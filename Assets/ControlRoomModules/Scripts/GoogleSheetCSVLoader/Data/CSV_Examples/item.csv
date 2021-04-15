@@ -1,0 +1,12 @@
+itemIndex,itemName,itemType,grade,desc
+int,string,string,int,string
+101,가나,Character,11,101
+102,다라,Enemy,12,102
+103,마바,Enemy,13,103
+104,사아,Enemy,14,104
+105,자카,Enemy,15,10
+106,몰라,Enemy,16,106
+107,테스트,Enemy,17,107
+108,랄라,Enemy,18,108
+109,오옷,Enemy,19,109
+110,솔이,Character,900,90
