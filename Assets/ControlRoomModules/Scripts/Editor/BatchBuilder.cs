@@ -18,7 +18,6 @@ namespace ControlRoom
 
 
         static string APP_NAME = "==APP NAME HERE==";
-        //static string TARGET_DIR = "target";
         static string BUNDLE_ID = "==APP BUNDLE ID HERE==";
         
 
@@ -43,6 +42,18 @@ namespace ControlRoom
             else if (defined == true && on == false)
                 PlayerSettings.SetScriptingDefineSymbolsForGroup(target, define.Replace(defineName, ""));
         }
+
+/*
+
+<Batch Command>
+{UnityPath} -quit -batchmode -logFile {BuildLogFilePath} -projectPath {UnityProjectPath} -buildTarget {BuildPlatform} -executeMethod ControlRoom.BatchBuilder.Build_AOS
+-CustomArg:BuildPath={BuildPath}?Version={Version}?VersionCode={VersionCode}?UseAppBundle={UseAppBundle}
+
+<Example>
+/Applications/Unity/Hub/Editor/2019.4.16f1/Unity.app/Contents/MacOS/Unity -quit -batchmode -logFile /Users/cho-eul-yeon/PrivateProject/Test/1_build.log 
+-projectPath /Users/cho-eul-yeon/PrivateProject/Test -buildTarget AOS -executeMethod ControlRoom.BatchBuilder.Build_AOS
+-CustomArg:BuildPath=/Users/cho-eul-yeon/PrivateProject/Test/Build/?Version=1.0.0?VersionCode=1?UseAppBundle=True
+*/
 
         static void Build_AOS()
         {
