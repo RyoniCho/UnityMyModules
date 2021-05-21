@@ -30,9 +30,12 @@ namespace ControlRoom
 		
 		public PhysicsControllerConditions Conditions { get; protected set; }
         private BoxCollider2D boxCollider;
-        private Vector2 speed=Vector2.zero;
+
+		private Vector2 speed=Vector2.zero;
         private Vector2 newPosition=Vector2.zero;
-        private float currentGravity=0f;
+		private Vector2 externalForce;
+
+		private float currentGravity=0f;
         private float movingPlatformCurrentGravity=0f;
 		private float movementDirection;
 		private float storedMovementDirection;		
@@ -134,11 +137,15 @@ namespace ControlRoom
 			{
 				Conditions.JustGotGrounded=true;
 			}
-			
-        }
+
+			externalForce.x = 0;
+			externalForce.y = 0;
 
 
-        private void SetGravity()
+		}
+
+
+		private void SetGravity()
         {
             currentGravity=initialGravity;
 
@@ -261,7 +268,7 @@ namespace ControlRoom
 				StandingOnCollider = belowHitsStorage [smallestDistanceIndex].collider;
 
 				// // if we're applying an external force (jumping, jetpack...) we only apply that
-				if (speed.y > 0)//_externalForce.y > 0 && 
+				if (speed.y > 0&& externalForce.y > 0)
 				{
 					newPosition.y = speed.y * Time.deltaTime;
 					Conditions.IsCollidingBelow = false;
@@ -306,7 +313,12 @@ namespace ControlRoom
 			{
 				 Conditions.IsCollidingBelow = false;
 			}
-        }
+
+			//if (StickToSlopes)
+			//{
+			//	StickToSlope();
+			//}
+		}
 
 		void CastRayToLeft()
 		{
@@ -356,7 +368,7 @@ namespace ControlRoom
 					
 					if (movementDirection == raysDirection)
                     {
-                        //Conditions.LateralSlopeAngle = hitAngle;
+                        Conditions.LateralSlopeAngle = hitAngle;
                     }        
 
 					// if the lateral slope angle is higher than our maximum slope angle, then we've hit a wall, and stop x movement accordingly
@@ -376,7 +388,7 @@ namespace ControlRoom
                         if(movementDirection == raysDirection) 
                         {
                             CurrentWallCollider = sideHitsStorage[i].collider.gameObject;
-                            //State.SlopeAngleOK = false;
+                            Conditions.SlopeAngleOK = false;
 
                             float distance = DistanceBetweenPointAndLine(sideHitsStorage[i].point, horizontalRayCastFromBottom, horizontalRayCastToTop);
                             if (raysDirection <= 0)
@@ -423,7 +435,7 @@ namespace ControlRoom
 				speed.x *= SlopeAngleSpeedFactor.Evaluate(Mathf.Abs(Conditions.BelowSlopeAngle) * Mathf.Sign(speed.y));
 			}
 
-			//if (!Conditions.OnAMovingPlatform)				
+			if (!Conditions.OnAMovingPlatform)				
 			{
 				// we make sure the velocity doesn't exceed the MaxVelocity specified in the parameters
 				speed.x = Mathf.Clamp(speed.x,-MaxVelocity.x,MaxVelocity.x);
@@ -441,15 +453,15 @@ namespace ControlRoom
 			else if (speed.x > movementDirectionThreshold)
             {
                 movementDirection = 1;
-            } 
-			// else if (_externalForce.x < -_movementDirectionThreshold)
-            // {
-            //     movementDirection = -1;
-            // } 
-			// else if (_externalForce.x > _movementDirectionThreshold)
-            // {
-            //     movementDirection = 1;
-            // }              
+            }
+            else if (externalForce.x < -movementDirectionThreshold)
+            {
+                movementDirection = -1;
+            }
+            else if (externalForce.x > movementDirectionThreshold)
+            {
+                movementDirection = 1;
+            }
 
             // if (_movingPlatform != null)
             // {
@@ -458,26 +470,32 @@ namespace ControlRoom
             //        _movementDirection = Mathf.Sign(_movingPlatform.CurrentSpeed.x);
             //     }
             // }
-             storedMovementDirection = movementDirection;                        
+            storedMovementDirection = movementDirection;                        
         }
 
-		public virtual void SetVerticalForce (float y)
+		public void SetVerticalForce (float y)
 		{
 			speed.y = y;
-			//_externalForce.y = y;
+			externalForce.y = y;
 
 		}
 
-		public virtual void AddVerticalForce(float y)
+		public void AddVerticalForce(float y)
 		{
 			speed.y += y;
-			//_externalForce.y += y;
+			externalForce.y += y;
 		}
 
-		public virtual void SetHorizontalForce (float x)
+		public void SetHorizontalForce (float x)
 		{
 			speed.x = x;
-			// _externalForce.x = x;
+			externalForce.x = x;
+		}
+
+		public void AddHorizontalForce(float x)
+		{
+			speed.x += x;
+			externalForce.x += x;
 		}
 
 		public void GravityActive(bool state)
