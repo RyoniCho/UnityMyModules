@@ -6,21 +6,46 @@ namespace ControlRoom
 {
     public class Agent: MonoBehaviour
     {
-       protected ControlRoom.PhysicsController controller;
-       protected ControlRoom.Brick[] bricks;
-       protected ControlRoom.AnimationController animationController;
+        protected ControlRoom.PhysicsController controller;
+        protected ControlRoom.Brick[] bricks;
+        protected ControlRoom.AnimationController animationController;
+        protected SpriteRenderer spriteRenderer;
+       
+        public enum FacingDirections { Left, Right }
+        public FacingDirections InitialFacingDirection = FacingDirections.Right;
 
 
-       private void Awake() 
-       {
+        public bool CanFlip { get; set; }
+        public bool IsFacingRight { get; set; }
+
+
+        private void Awake() 
+        {
             this.controller=this.GetComponent<ControlRoom.PhysicsController>();
             this.bricks=this.GetComponents<ControlRoom.Brick>();
             this.animationController=this.GetComponentInChildren<ControlRoom.AnimationController>();
-       }
+            this.spriteRenderer = this.GetComponentInChildren<SpriteRenderer>();
+
+            Initialize();
+        }
+
+        private void Initialize()
+        {
+            if (InitialFacingDirection == FacingDirections.Left)
+            {
+                IsFacingRight = false;
+            }
+            else
+            {
+                IsFacingRight = true;
+            }
+
+            CanFlip = true;
+        }
 
 
-       private void Update() 
-       {
+        private void Update() 
+        {
             foreach(var brick in this.bricks)
             {
                 if(brick.isActiveAndEnabled)
@@ -28,7 +53,24 @@ namespace ControlRoom
                     brick.UpdateFrame();
                 }
             }   
-       }
+        }
+
+        public void Flip()
+        {
+            if (!CanFlip)
+                return;
+
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.flipX = !spriteRenderer.flipX;
+               
+            }
+
+            IsFacingRight = !IsFacingRight;
+
+        }
+
+
 
     }
 }

@@ -160,7 +160,6 @@ namespace ControlRoom
 			}
 
 			// we decrease the number of jumps left
-            Debug.Log($"NumberOfJumpLeft {NumberOfJumpsLeft}");
 			NumberOfJumpsLeft = NumberOfJumpsLeft - 1;
 
 			// we reset our current condition and gravity

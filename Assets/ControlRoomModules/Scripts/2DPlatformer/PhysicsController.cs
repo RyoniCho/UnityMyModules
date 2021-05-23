@@ -78,9 +78,11 @@ namespace ControlRoom
 
 
 		public Vector2 Speed { get{ return speed; } }
+		public Vector2 ExternalForce { get { return externalForce; } }
 
 
-        private void Awake() {
+
+		private void Awake() {
             
             boxCollider=this.GetComponent<BoxCollider2D>();
             belowHitsStorage=new RaycastHit2D[numberOfVerticalRays];

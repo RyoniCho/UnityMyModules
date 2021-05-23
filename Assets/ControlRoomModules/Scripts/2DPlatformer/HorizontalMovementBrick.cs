@@ -184,20 +184,22 @@ namespace ControlRoom
             if (_horizontalMovement > InputThreshold)
 			{
 				_normalizedHorizontalSpeed = _horizontalMovement;
-				// if (!_character.IsFacingRight && canFlip && FlipCharacterToFaceDirection)
-                // {
-                //     _character.Flip();
-                // }					
-			}		
+                if (!agent.IsFacingRight && canFlip && FlipCharacterToFaceDirection)
+                {
+					
+                    agent.Flip();
+                }
+            }		
 			// If it's negative, then we're facing left
 			else if (_horizontalMovement < -InputThreshold)
 			{
 				_normalizedHorizontalSpeed = _horizontalMovement;
-				// if (_character.IsFacingRight && canFlip && FlipCharacterToFaceDirection)
-                // {
-                //     _character.Flip();
-                // }					
-			}
+                if (agent.IsFacingRight && canFlip && FlipCharacterToFaceDirection)
+                {
+					
+                    agent.Flip();
+                }
+            }
 			else
 			{
 				_normalizedHorizontalSpeed = 0;
@@ -275,10 +277,10 @@ namespace ControlRoom
                 _horizontalMovementForce = movementSpeed;
 
                 // and any external forces that may be active right now
-                // if (Mathf.Abs(_controller.ExternalForce.x) > 0)
-                // {
-                //     _horizontalMovementForce += _controller.ExternalForce.x;
-                // }                
+                if (Mathf.Abs(controller.ExternalForce.x) > 0)
+                {
+                    _horizontalMovementForce += controller.ExternalForce.x;
+                }
             }
             else
             {

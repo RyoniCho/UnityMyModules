@@ -11,6 +11,7 @@ namespace ControlRoom
         protected bool IsInitialized=false;
 
         protected ControlRoom.PhysicsController controller;
+		protected ControlRoom.Agent agent;
 
         protected virtual void Start () 
 		{
@@ -20,6 +21,7 @@ namespace ControlRoom
         protected virtual void Initialize()
         {
             this.controller=this.GetComponentInParent<ControlRoom.PhysicsController>();
+			this.agent = this.GetComponentInParent<ControlRoom.Agent>();
 
             IsInitialized=true;
         }
