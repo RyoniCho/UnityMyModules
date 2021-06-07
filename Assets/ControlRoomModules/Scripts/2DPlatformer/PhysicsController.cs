@@ -49,7 +49,24 @@ namespace ControlRoom
 
         private readonly float _smallValue=0.0001f;
 		private readonly float obstacleHeightTolerance=0.05f;
-		private readonly float MaximumSlopeAngle = 30f;
+		private float maximumSlopeAngle = 30f;
+		public  float MaximumSlopeAngle
+        {
+            get
+            {
+				return maximumSlopeAngle;
+            }
+            set
+            {
+				if(value>=0)
+                {
+					maximumSlopeAngle = value;
+					Debug.Log($"Maximum Slope Angel Change from {maximumSlopeAngle} to {value}");
+				}
+					
+				
+            }
+        }
 		Vector3 crossBelowSlopeAngle;
 
 
