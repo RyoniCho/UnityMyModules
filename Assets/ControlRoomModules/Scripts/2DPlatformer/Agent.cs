@@ -68,6 +68,14 @@ namespace ControlRoom
 
             IsFacingRight = !IsFacingRight;
 
+            foreach (var brick in this.bricks)
+            {
+                if (brick.isActiveAndEnabled)
+                {
+                    brick.Flip();
+                }
+            }
+
         }
 
 

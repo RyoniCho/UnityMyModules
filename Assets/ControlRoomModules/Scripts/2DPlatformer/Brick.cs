@@ -68,5 +68,10 @@ namespace ControlRoom
 
         }
 
+		public virtual void Flip()
+        {
+
+        }
+
     }    
 }
