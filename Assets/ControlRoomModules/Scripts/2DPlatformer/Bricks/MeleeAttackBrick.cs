@@ -14,13 +14,19 @@ namespace ControlRoom
         /// the offset to apply to the damage area (from the weapon's attachment position
         [Tooltip("the offset to apply to the damage area (from the weapon's attachment position")]
         public Vector2 AreaOffset = new Vector2(1, 0);
+        public float InitialDelay = 0f;
+        public float ActiveDuration = 0.3f;
+
+
 
 
         private GameObject attackArea;
         private BoxCollider2D boxCollider;
         private CircleCollider2D circleCollider;
-        private Collider2D collider;
+        private Collider2D attackCollider;
         private Vector3 flipVector = new Vector3(-1, 1, 1);
+        private bool isAttacking = false;
+
         public enum AreaColliderType
         {
             BoxCollider,
@@ -32,11 +38,18 @@ namespace ControlRoom
             base.Initialize();
 
             CreateAttackArea();
+            DisableAttackArea();
         }
 
         protected override void HandleInput()
         {
             base.HandleInput();
+
+            if(Input.GetKeyDown(KeyCode.I))
+            {
+                PlayAttack();
+            }
+
         }
 
         protected override void UpdateBrickProcess()
@@ -59,18 +72,18 @@ namespace ControlRoom
                         this.boxCollider = attackArea.AddComponent<BoxCollider2D>();
                         this.boxCollider.offset = AreaOffset;
                         this.boxCollider.size = AreaSize;
-                        this.collider = this.boxCollider;
+                        this.attackCollider = this.boxCollider;
 
                         break;
                     case AreaColliderType.CircleCollider:
                         this.circleCollider = attackArea.AddComponent<CircleCollider2D>();
                         this.circleCollider.radius = AreaSize.x / 2;
                         this.circleCollider.offset = AreaOffset;
-                        this.collider = this.circleCollider;
+                        this.attackCollider = this.circleCollider;
                         break;
                 }
 
-                this.collider.isTrigger = true;
+                this.attackCollider.isTrigger = true;
 
                 //Rigidbody2D rigidBody = this.collider.AddComponent<Rigidbody2D>();
                 //rigidBody.isKinematic = true;
@@ -82,6 +95,36 @@ namespace ControlRoom
                 //_damageOnTouch.DamageCausedKnockbackForce = KnockbackForce;
                 //_damageOnTouch.InvincibilityDuration = InvincibilityDuration;
             }
+        }
+
+        public void PlayAttack()
+        {
+            StartCoroutine(AttackCouroutine());
+        }
+
+        private void EnableAttackArea()
+        {
+            if (this.attackCollider != null)
+                this.attackCollider.enabled = true;
+        }
+
+        private void DisableAttackArea()
+        {
+            if(this.attackCollider!=null)
+                this.attackCollider.enabled = false;
+        }
+
+        private IEnumerator AttackCouroutine()
+        {
+            if (isAttacking) { yield break; }
+
+            isAttacking = true;
+            yield return new WaitForSeconds(InitialDelay);
+            EnableAttackArea();
+           
+            yield return new WaitForSeconds(ActiveDuration);
+            DisableAttackArea();
+            isAttacking = false;
         }
 
         public override void Flip()
