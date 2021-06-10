@@ -24,6 +24,7 @@ namespace ControlRoom
         private BoxCollider2D boxCollider;
         private CircleCollider2D circleCollider;
         private Collider2D attackCollider;
+        private OnDamage damager;
         private Vector3 flipVector = new Vector3(-1, 1, 1);
         private bool isAttacking = false;
 
@@ -88,12 +89,12 @@ namespace ControlRoom
                 //Rigidbody2D rigidBody = this.collider.AddComponent<Rigidbody2D>();
                 //rigidBody.isKinematic = true;
 
-                //_damageOnTouch = this.collider.AddComponent<DamageOnTouch>();
-                //_damageOnTouch.TargetLayerMask = TargetLayerMask;
-                //_damageOnTouch.DamageCaused = DamageCaused;
-                //_damageOnTouch.DamageCausedKnockbackType = Knockback;
-                //_damageOnTouch.DamageCausedKnockbackForce = KnockbackForce;
-                //_damageOnTouch.InvincibilityDuration = InvincibilityDuration;
+                damager = this.attackArea.AddComponent<OnDamage>();
+                //damager.TargetLayerMask = TargetLayerMask;
+                //damager.DamageCaused = DamageCaused;
+                //damager.DamageCausedKnockbackType = Knockback;
+                //damager.DamageCausedKnockbackForce = KnockbackForce;
+                //damager.InvincibilityDuration = InvincibilityDuration;
             }
         }
 

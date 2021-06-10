@@ -22,7 +22,7 @@ namespace ControlRoom
         private void Awake() 
         {
             this.controller=this.GetComponent<ControlRoom.PhysicsController>();
-            this.bricks=this.GetComponents<ControlRoom.Brick>();
+            this.bricks=this.GetComponentsInChildren<ControlRoom.Brick>();
             this.animationController=this.GetComponentInChildren<ControlRoom.AnimationController>();
             this.spriteRenderer = this.GetComponentInChildren<SpriteRenderer>();
 
