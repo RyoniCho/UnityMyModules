@@ -78,6 +78,58 @@ namespace ControlRoom
 
         }
 
+        public void FlickColor(Color initialColor,Color flickerColor,float flickerSpeed,float flickerDuration)
+        {
+            StartCoroutine(Flicker(initialColor, flickerColor, flickerSpeed, flickerDuration));
+        }
+
+
+        private IEnumerator Flicker(Color initialColor, Color flickerColor, float flickerSpeed, float flickerDuration)
+        {
+            if (this.spriteRenderer == null)
+            {
+                yield break;
+            }
+
+            if (!this.spriteRenderer.material.HasProperty("_Color"))
+            {
+                yield break;
+            }
+
+            if (initialColor == flickerColor)
+            {
+                yield break;
+            }
+
+            float flickerStop = Time.time + flickerDuration;
+
+            while (Time.time < flickerStop)
+            {
+                this.spriteRenderer.material.color = flickerColor;
+                yield return new WaitForSeconds(flickerSpeed);
+                this.spriteRenderer.material.color = initialColor;
+                yield return new WaitForSeconds(flickerSpeed);
+            }
+
+            this.spriteRenderer.material.color = initialColor;
+        }
+
+        public Color InitialColor
+        {
+            get
+            {
+                if (this.spriteRenderer != null)
+                {
+                    if (this.spriteRenderer.material.HasProperty("_Color"))
+                    {
+                        return this.spriteRenderer.material.color;
+                    }
+                }
+
+                return Color.white;
+            }
+        }
+
 
 
     }

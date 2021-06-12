@@ -16,6 +16,9 @@ namespace ControlRoom
         public Vector2 AreaOffset = new Vector2(1, 0);
         public float InitialDelay = 0f;
         public float ActiveDuration = 0.3f;
+        public LayerMask TargetLayerMask;
+        public int DamageCaused;
+
 
 
 
@@ -86,12 +89,12 @@ namespace ControlRoom
 
                 this.attackCollider.isTrigger = true;
 
-                //Rigidbody2D rigidBody = this.collider.AddComponent<Rigidbody2D>();
-                //rigidBody.isKinematic = true;
+                Rigidbody2D rigidBody = this.attackArea.AddComponent<Rigidbody2D>();
+                rigidBody.isKinematic = true;
 
                 damager = this.attackArea.AddComponent<OnDamage>();
-                //damager.TargetLayerMask = TargetLayerMask;
-                //damager.DamageCaused = DamageCaused;
+                damager.targetLayerMask = TargetLayerMask;
+                damager.DamageCaused = DamageCaused;
                 //damager.DamageCausedKnockbackType = Knockback;
                 //damager.DamageCausedKnockbackForce = KnockbackForce;
                 //damager.InvincibilityDuration = InvincibilityDuration;

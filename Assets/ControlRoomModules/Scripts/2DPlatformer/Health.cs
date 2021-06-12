@@ -25,9 +25,10 @@ namespace ControlRoom
         /// the color the sprite should flicker to
         [Tooltip("the color the sprite should flicker to")]
         public Color FlickerColor = new Color32(255, 20, 20, 255);
-
+        private Color initialColor;
         private int lastDamage;
         private Vector2 lastDamageDirection;
+        private Agent agent;
 
         private void Awake()
         {
@@ -36,6 +37,16 @@ namespace ControlRoom
 
         private void Init()
         {
+           
+            if(this.TryGetComponent<Agent>(out agent))
+            {
+                initialColor = agent.InitialColor;
+            }
+            else
+            {
+                Debug.LogError($"{this.gameObject.name}-(Health) Could not found Agent");
+            }
+
             currentHealth = MaximumHealth;
             DamageEnabled();
         }
@@ -100,14 +111,14 @@ namespace ControlRoom
             //// we play the damage feedback
             //DamageFeedbacks?.PlayFeedbacks();
 
-            //if (FlickerSpriteOnHit)
-            //{
-            //    // We make the character's sprite flicker
-            //    if (_renderer != null)
-            //    {
-            //        StartCoroutine(MMImage.Flicker(_renderer, _initialColor, FlickerColor, 0.05f, flickerDuration));
-            //    }
-            //}
+            if (FlickerSpriteOnHit)
+            {
+                // We make the character's sprite flicker
+                if (agent != null)
+                {
+                   agent.FlickColor(initialColor, FlickerColor, 0.05f, flickerDuration);
+                }
+            }
 
             //// we update the health bar
             //UpdateHealthBar(true);
