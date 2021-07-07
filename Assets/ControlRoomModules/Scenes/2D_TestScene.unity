@@ -343,6 +343,55 @@ Transform:
   m_Father: {fileID: 1304404997}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &615662663
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 615662664}
+  - component: {fileID: 615662665}
+  m_Layer: 7
+  m_Name: Bricks
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &615662664
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 615662663}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 858692094}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &615662665
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 615662663}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa4b4d9eabe6e418a8dc2cf9dcd63c47, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  NumberOfJumps: 2
+  JumpHeight: 3.025
+  NumberOfJumpsLeft: 0
+  JumpIsProportionalToThePressTime: 1
+  JumpMinimumAirTime: 0.1
+  JumpReleaseForceFactor: 2
 --- !u!1 &858692089
 GameObject:
   m_ObjectHideFlags: 0
@@ -356,6 +405,10 @@ GameObject:
   - component: {fileID: 858692092}
   - component: {fileID: 858692091}
   - component: {fileID: 858692090}
+  - component: {fileID: 858692095}
+  - component: {fileID: 858692098}
+  - component: {fileID: 858692097}
+  - component: {fileID: 858692096}
   m_Layer: 7
   m_Name: EnemyTest
   m_TagString: Untagged
@@ -487,9 +540,84 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 987203632}
+  - {fileID: 615662664}
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &858692095
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 858692089}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0757e5486b07140dfb00381bbe143f48, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  BrainActive: 1
+  states:
+  - StateName: Patrol
+    Actions:
+    - {fileID: 858692096}
+    Transitions:
+    - Decision: {fileID: 858692098}
+      TrueState: Jump
+      FalseState: 
+  - StateName: Jump
+    Actions:
+    - {fileID: 858692097}
+    Transitions:
+    - Decision: {fileID: 858692098}
+      TrueState: 
+      FalseState: Patrol
+  ActionsFrequency: 0
+  DecisionFrequency: 0
+  TimeInThisState: 0
+  Target: {fileID: 0}
+--- !u!114 &858692096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 858692089}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9422f116fc5df4b8fb88a05577c20dd4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &858692097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 858692089}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ed5cbfcad7cb426892230429aea215d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MaxNumberOfJump: 1
+--- !u!114 &858692098
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 858692089}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 258b7ed95e28c4c44a5df91c2154b699, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Radius: 1
+  TargetLayer:
+    serializedVersion: 2
+    m_Bits: 1
+  DetectionOriginOffset: {x: 0, y: 0, z: 0}
 --- !u!1 &915738422
 GameObject:
   m_ObjectHideFlags: 0

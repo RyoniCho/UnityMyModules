@@ -27,6 +27,7 @@ namespace ControlRoom
             this.spriteRenderer = this.GetComponentInChildren<SpriteRenderer>();
 
             Initialize();
+
         }
 
         private void Initialize()
@@ -128,6 +129,19 @@ namespace ControlRoom
 
                 return Color.white;
             }
+        }
+
+        public T FindBrick<T>() where T: Brick
+        {
+            foreach(var brick in bricks)
+            {
+                if(brick is T findbrick)
+                {
+                    return findbrick;
+                }
+            }
+
+            return null;
         }
 
 
