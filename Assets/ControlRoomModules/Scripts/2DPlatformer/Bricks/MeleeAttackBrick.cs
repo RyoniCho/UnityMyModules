@@ -21,8 +21,6 @@ namespace ControlRoom
 
 
 
-
-
         private GameObject attackArea;
         private BoxCollider2D boxCollider;
         private CircleCollider2D circleCollider;
@@ -30,6 +28,8 @@ namespace ControlRoom
         private OnDamage damager;
         private Vector3 flipVector = new Vector3(-1, 1, 1);
         private bool isAttacking = false;
+        private const string attackAnimationParameterName = "Attack";
+        private int attackAnimationParameter;
 
         public enum AreaColliderType
         {
@@ -123,9 +123,14 @@ namespace ControlRoom
             if (isAttacking) { yield break; }
 
             isAttacking = true;
+
+            animationController.UpdateAnimatorTrigger(attackAnimationParameter);
+           
+
             yield return new WaitForSeconds(InitialDelay);
             EnableAttackArea();
            
+
             yield return new WaitForSeconds(ActiveDuration);
             DisableAttackArea();
             isAttacking = false;
@@ -138,6 +143,13 @@ namespace ControlRoom
                 attackArea.transform.localScale = Vector3.Scale(attackArea.transform.localScale, flipVector);
             }
         }
+
+        protected override void InitializeAnimParam()
+        {
+            animationController.AddAnimatorParameterIfExists(attackAnimationParameterName, out attackAnimationParameter, AnimatorControllerParameterType.Trigger);
+        }
+
+       
     }
 }
 

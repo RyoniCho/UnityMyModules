@@ -12,6 +12,7 @@ namespace ControlRoom
 
         protected ControlRoom.PhysicsController controller;
 		protected ControlRoom.Agent agent;
+		protected ControlRoom.AnimationController animationController;
 
         protected virtual void Start () 
 		{
@@ -23,7 +24,12 @@ namespace ControlRoom
             this.controller=this.GetComponentInParent<ControlRoom.PhysicsController>();
 			this.agent = this.GetComponentInParent<ControlRoom.Agent>();
 
-            IsInitialized=true;
+			if(this.agent!=null)
+				this.animationController = this.agent.AnimController;
+
+			InitializeAnimParam();
+
+			IsInitialized=true;
         }
 
         public void UpdateFrame()
@@ -31,6 +37,9 @@ namespace ControlRoom
             this.InternalHandleInput();
             this.UpdateBrickProcess();
         }
+
+		
+
         protected virtual void InternalHandleInput()
 		{
 			// if (_inputManager == null) { return; }
@@ -55,6 +64,8 @@ namespace ControlRoom
 			HandleInput();
 		}
 
+		
+
 		/// <summary>
 		/// Called at the very start of the ability's cycle, and intended to be overridden, looks for input and calls methods if conditions are met
 		/// </summary>
@@ -73,5 +84,15 @@ namespace ControlRoom
 
         }
 
-    }    
+		protected virtual void InitializeAnimParam()
+        {
+
+        }
+
+		public virtual void UpdateAnimator()
+		{
+
+		}
+
+	}    
 }

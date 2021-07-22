@@ -149,7 +149,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 127703274}
   m_LocalRotation: {x: -0, y: -0, z: -0.36730438, w: 0.9301008}
-  m_LocalPosition: {x: -6.94, y: -0.58, z: 0}
+  m_LocalPosition: {x: -8.45, y: 0.52, z: 0}
   m_LocalScale: {x: 10, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1304404997}
@@ -502,7 +502,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: -0.033303976, y: 1.5486412}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -513,7 +513,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 2.0990357, y: 2.831726}
   m_EdgeRadius: 0
 --- !u!114 &858692093
 MonoBehaviour:
@@ -667,12 +667,12 @@ MonoBehaviour:
   colliderType: 1
   AreaSize: {x: 1, y: 1}
   AreaOffset: {x: 1, y: 0}
-  InitialDelay: 0
-  ActiveDuration: 0.3
+  InitialDelay: 0.2
+  ActiveDuration: 0.1
   TargetLayerMask:
     serializedVersion: 2
     m_Bits: 128
-  DamageCaused: 10
+  DamageCaused: 1
 --- !u!114 &915738425
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -830,7 +830,6 @@ GameObject:
   - component: {fileID: 1090427702}
   - component: {fileID: 1090427701}
   - component: {fileID: 1090427698}
-  - component: {fileID: 1090427704}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -851,7 +850,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: 0.10823834, y: 1.1073614}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -862,7 +861,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.7, y: 0.94}
+  m_Size: {x: 1.2164766, y: 2.3231943}
   m_EdgeRadius: 0
 --- !u!114 &1090427701
 MonoBehaviour:
@@ -947,18 +946,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1090427704
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1090427697}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f6b69f1e577ce475aba52a00c3b15d2e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1304404996
 GameObject:
   m_ObjectHideFlags: 0
@@ -1018,7 +1005,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1488436092}
   m_LocalRotation: {x: -0, y: -0, z: 0.19226591, w: 0.98134285}
-  m_LocalPosition: {x: 7.21, y: -1.6, z: 0}
+  m_LocalPosition: {x: 8.64, y: -1.02, z: 0}
   m_LocalScale: {x: 10, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1304404997}
@@ -1155,7 +1142,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 3
+  orthographic size: 10
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -1196,6 +1183,7 @@ GameObject:
   - component: {fileID: 1738809022}
   - component: {fileID: 1738809023}
   - component: {fileID: 1738809024}
+  - component: {fileID: 1738809025}
   m_Layer: 0
   m_Name: Model
   m_TagString: Untagged
@@ -1258,7 +1246,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -8346336570930814971, guid: 03d11acd0dae84af78795c5fc68594b0, type: 3}
+  m_Sprite: {fileID: 2195706107580614043, guid: 11cdfaf8000f5400fac5310ff05476e2, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -1288,3 +1276,15 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &1738809025
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1738809021}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6b69f1e577ce475aba52a00c3b15d2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

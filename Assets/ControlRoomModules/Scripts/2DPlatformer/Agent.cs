@@ -26,6 +26,9 @@ namespace ControlRoom
             this.animationController=this.GetComponentInChildren<ControlRoom.AnimationController>();
             this.spriteRenderer = this.GetComponentInChildren<SpriteRenderer>();
 
+            if(this.animationController!=null)
+                this.animationController.SetBricks(this.bricks);
+
             Initialize();
 
         }
@@ -143,6 +146,8 @@ namespace ControlRoom
 
             return null;
         }
+
+        public AnimationController AnimController { get { return this.animationController; } }
 
 
 

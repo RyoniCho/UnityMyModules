@@ -387,53 +387,55 @@ namespace ControlRoom
 			MovementSpeed = WalkSpeed;
 		}
 
-		/// <summary>
-		/// Adds required animator parameters to the animator parameters list if they exist
-		/// </summary>
-		// protected override void InitializeAnimatorParameters()
-		// {
-		// 	RegisterAnimatorParameter (_speedAnimationParameterName, AnimatorControllerParameterType.Float, out _speedAnimationParameter);
-		// 	RegisterAnimatorParameter (_walkingAnimationParameterName, AnimatorControllerParameterType.Bool, out _walkingAnimationParameter);
-		// }
+        /// <summary>
+        /// Adds required animator parameters to the animator parameters list if they exist
+        /// </summary>
+        protected override void InitializeAnimParam()
+        {
+            //RegisterAnimatorParameter(_speedAnimationParameterName, AnimatorControllerParameterType.Float, out _speedAnimationParameter);
+            //RegisterAnimatorParameter(_walkingAnimationParameterName, AnimatorControllerParameterType.Bool, out _walkingAnimationParameter);
+            animationController.AddAnimatorParameterIfExists(_speedAnimationParameterName, out _speedAnimationParameter, AnimatorControllerParameterType.Float);
+        }
 
-		// /// <summary>
-		// /// Sends the current speed and the current value of the Walking state to the animator
-		// /// </summary>
-		// public override void UpdateAnimator()
-		// {
-        //     MMAnimatorExtensions.UpdateAnimatorFloat(_animator, _speedAnimationParameter, Mathf.Abs(_normalizedHorizontalSpeed), _character._animatorParameters, _character.PerformAnimatorSanityChecks);
-        //     MMAnimatorExtensions.UpdateAnimatorBool(_animator, _walkingAnimationParameter, (_movement.CurrentState == CharacterStates.MovementStates.Walking), _character._animatorParameters, _character.PerformAnimatorSanityChecks);
-		// }
-        
+
+        // /// <summary>
+        // /// Sends the current speed and the current value of the Walking state to the animator
+        // /// </summary>
+        public override void UpdateAnimator()
+        {
+            animationController.UpdateAnimatorFloat(_speedAnimationParameter, Mathf.Abs(_normalizedHorizontalSpeed));
+            
+        }
+
         // /// <summary>
         // /// When the character gets revived we reinit it again
         // /// </summary>
-		// protected virtual void OnRevive()
-		// {
-		// 	Initialization ();
-		// }
+        // protected virtual void OnRevive()
+        // {
+        // 	Initialization ();
+        // }
 
-		/// <summary>
-		/// When the player respawns, we reinstate this agent.
-		/// </summary>
-		/// <param name="checkpoint">Checkpoint.</param>
-		/// <param name="player">Player.</param>
-		// protected override void OnEnable ()
-		// {
-		// 	base.OnEnable ();
-		// 	if (gameObject.GetComponentInParent<Health>() != null)
-		// 	{
-		// 		gameObject.GetComponentInParent<Health>().OnRevive += OnRevive;
-		// 	}
-		// }
+        /// <summary>
+        /// When the player respawns, we reinstate this agent.
+        /// </summary>
+        /// <param name="checkpoint">Checkpoint.</param>
+        /// <param name="player">Player.</param>
+        // protected override void OnEnable ()
+        // {
+        // 	base.OnEnable ();
+        // 	if (gameObject.GetComponentInParent<Health>() != null)
+        // 	{
+        // 		gameObject.GetComponentInParent<Health>().OnRevive += OnRevive;
+        // 	}
+        // }
 
-		// protected override void OnDisable()
-		// {
-		// 	base.OnDisable ();
-		// 	if (_health != null)
-		// 	{
-		// 		_health.OnRevive -= OnRevive;
-		// 	}			
-		// }
-	}
+        // protected override void OnDisable()
+        // {
+        // 	base.OnDisable ();
+        // 	if (_health != null)
+        // 	{
+        // 		_health.OnRevive -= OnRevive;
+        // 	}			
+        // }
+    }
 }

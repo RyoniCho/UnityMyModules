@@ -1,31 +1,34 @@
 fileFormatVersion: 2
-guid: fc22eebca85db4826be7ab16d8a91ac9
+guid: 11cdfaf8000f5400fac5310ff05476e2
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3916014492145418437
-    second: Idle_Walk_Ani_0
+      213: 2195706107580614043
+    second: GrayTest_0
   - first:
-      213: -6913469198895842839
-    second: Idle_Walk_Ani_1
+      213: 8975810524588579822
+    second: GrayTest_1
   - first:
-      213: 7793447609196475395
-    second: Idle_Walk_Ani_2
+      213: -1960914709903114780
+    second: GrayTest_2
   - first:
-      213: -1330604359353885294
-    second: Idle_Walk_Ani_3
+      213: 7054578313922392427
+    second: GrayTest_3
   - first:
-      213: -4041736607338008640
-    second: Idle_Walk_Ani_4
+      213: 3319242826396289623
+    second: GrayTest_4
   - first:
-      213: -6244548390588903246
-    second: Idle_Walk_Ani_5
+      213: -6695213390464356315
+    second: GrayTest_5
   - first:
-      213: 1922275732172301604
-    second: Idle_Walk_Ani_6
+      213: 7013362207441864972
+    second: GrayTest_6
   - first:
-      213: 2722188704131770300
-    second: Idle_Walk_Ani_7
+      213: -8547327241441678387
+    second: GrayTest_7
+  - first:
+      213: 5599885910600412640
+    second: GrayTest_8
   externalObjects: {}
   serializedVersion: 11
   mipmaps:
@@ -139,13 +142,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Idle_Walk_Ani_0
+      name: GrayTest_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 0
+        y: 35
         width: 32
-        height: 32
+        height: 29
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -153,20 +156,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b3ff36c319587a9c0800000000000000
-      internalID: -3916014492145418437
+      spriteID: b958f7d4217b87e10800000000000000
+      internalID: 2195706107580614043
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Idle_Walk_Ani_1
+      name: GrayTest_1
       rect:
         serializedVersion: 2
         x: 32
-        y: 0
+        y: 35
         width: 32
-        height: 32
+        height: 29
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -174,20 +177,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 9e9753a846c6e00a0800000000000000
-      internalID: -6913469198895842839
+      spriteID: eeb9051cd1c709c70800000000000000
+      internalID: 8975810524588579822
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Idle_Walk_Ani_2
+      name: GrayTest_2
       rect:
         serializedVersion: 2
         x: 64
-        y: 0
+        y: 35
         width: 32
-        height: 32
+        height: 29
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -195,20 +198,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 304f5c12f43e72c60800000000000000
-      internalID: 7793447609196475395
+      spriteID: 4edf261f57e69c4e0800000000000000
+      internalID: -1960914709903114780
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Idle_Walk_Ani_3
+      name: GrayTest_3
       rect:
         serializedVersion: 2
         x: 96
-        y: 0
+        y: 35
         width: 32
-        height: 32
+        height: 29
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -216,20 +219,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 29d1020926eb88de0800000000000000
-      internalID: -1330604359353885294
+      spriteID: b61b4898995e6e160800000000000000
+      internalID: 7054578313922392427
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Idle_Walk_Ani_4
+      name: GrayTest_4
       rect:
         serializedVersion: 2
         x: 128
-        y: 0
+        y: 35
         width: 32
-        height: 32
+        height: 29
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -237,20 +240,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 0cfeceb38fdd8e7c0800000000000000
-      internalID: -4041736607338008640
+      spriteID: 75a4d96b3c1501e20800000000000000
+      internalID: 3319242826396289623
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Idle_Walk_Ani_5
+      name: GrayTest_5
       rect:
         serializedVersion: 2
         x: 160
-        y: 0
+        y: 35
         width: 32
-        height: 32
+        height: 29
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -258,20 +261,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 2b01634e258e659a0800000000000000
-      internalID: -6244548390588903246
+      spriteID: 520fee5e4e2d513a0800000000000000
+      internalID: -6695213390464356315
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Idle_Walk_Ani_6
+      name: GrayTest_6
       rect:
         serializedVersion: 2
         x: 192
-        y: 0
+        y: 35
         width: 32
-        height: 32
+        height: 29
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -279,20 +282,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 425eb70089b4daa10800000000000000
-      internalID: 1922275732172301604
+      spriteID: c09c8bfe4c7745160800000000000000
+      internalID: 7013362207441864972
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Idle_Walk_Ani_7
+      name: GrayTest_7
       rect:
         serializedVersion: 2
         x: 224
-        y: 0
+        y: 35
         width: 32
-        height: 32
+        height: 29
       alignment: 7
       pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -300,8 +303,29 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: cb7ea51243827c520800000000000000
-      internalID: 2722188704131770300
+      spriteID: dcb69dad82bc16980800000000000000
+      internalID: -8547327241441678387
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrayTest_8
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 3
+        width: 32
+        height: 29
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0ed6d04f09ac6bd40800000000000000
+      internalID: 5599885910600412640
       vertices: []
       indices: 
       edges: []

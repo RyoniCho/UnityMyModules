@@ -9,61 +9,43 @@ namespace ControlRoom
     {
         private Animator animator;
         private HashSet<int> animatorParameters;
-
-        //Animator Parameter
-        protected const string groundedAnimationParameterName = "Grounded";
-		protected const string airborneAnimationParameterName = "Airborne";
-		protected const string xSpeedAnimationParameterName = "xSpeed";
-		protected const string ySpeedAnimationParameterName = "ySpeed";
-		protected const string worldXSpeedAnimationParameterName = "WorldXSpeed";
-		protected const string worldYSpeedAnimationParameterName = "WorldYSpeed";
-		protected const string collidingLeftAnimationParameterName = "CollidingLeft";
-		protected const string collidingRightAnimationParameterName = "CollidingRight";
-		protected const string collidingBelowAnimationParameterName = "CollidingBelow";
-		protected const string collidingAboveAnimationParameterName = "CollidingAbove";
-		protected const string idleSpeedAnimationParameterName = "Idle";
-		protected const string aliveAnimationParameterName = "Alive";
-		protected const string facingRightAnimationParameterName = "FacingRight";
-        protected const string randomAnimationParameterName = "Random";
-        protected const string randomConstantAnimationParameterName = "RandomConstant";
-
-        protected int groundedAnimationParameter;
-		protected int airborneSpeedAnimationParameter;
-		protected int xSpeedSpeedAnimationParameter;
-		protected int ySpeedSpeedAnimationParameter;
-		protected int worldXSpeedSpeedAnimationParameter;
-		protected int worldYSpeedSpeedAnimationParameter;
-		protected int collidingLeftAnimationParameter;
-		protected int collidingRightAnimationParameter;
-		protected int collidingBelowAnimationParameter;
-		protected int collidingAboveAnimationParameter;
-		protected int idleSpeedAnimationParameter;
-		protected int aliveAnimationParameter;
-		protected int facingRightAnimationParameter;
-        protected int randomAnimationParameter;
-        protected int randomConstantAnimationParameter;
+        private Brick[] bricks;
 
 
         private void Awake() 
-        { 
-            this.animator=this.GetComponent<Animator>();
+        {
+
+            Initialize();
+        }
+
+        private void Update()
+        {
+            if(this.bricks?.Length>0)
+            {
+                foreach(var brick in this.bricks)
+                {
+                    brick.UpdateAnimator();
+                }
+            }
         }
 
 
-        private void SetAnimatorParameter()
+        private void Initialize()
         {
-            if (this.animator == null) 
-                return; 
+            this.animator = this.GetComponent<Animator>();
+
+            if (this.animator == null)
+                return;
 
             animatorParameters = new HashSet<int>();
-
-            AddAnimatorParameterIfExists(groundedAnimationParameterName,out groundedAnimationParameter,AnimatorControllerParameterType.Bool,animatorParameters);
-            AddAnimatorParameterIfExists(airborneAnimationParameterName,out airborneSpeedAnimationParameter,AnimatorControllerParameterType.Bool,animatorParameters);
-
-
         }
 
-        public void AddAnimatorParameterIfExists(string parameterName, out int parameter, AnimatorControllerParameterType type, HashSet<int> parameterList)
+        public void SetBricks(Brick[] bricks)
+        {
+            this.bricks = bricks;
+        }
+
+        public void AddAnimatorParameterIfExists(string parameterName, out int parameter, AnimatorControllerParameterType type)
         {
             if (string.IsNullOrEmpty(parameterName))
             {
@@ -75,11 +57,40 @@ namespace ControlRoom
 
             if (this.animator.CheckToIncludeAnimatorParameter(parameterName, type))
             {
-                parameterList.Add(parameter);
+                this.animatorParameters.Add(parameter);
             }
         }
 
-          
+        public void UpdateAnimatorFloat(int paramter,float value)
+        {
+            if(this.animator!=null)
+            {
+               if(this.animatorParameters.Contains(paramter))  
+                    this.animator.SetFloat(paramter, value);
+            }
+        }
+
+        public void UpdateAnimatorBool(int paramter,bool value)
+        {
+            if (this.animator != null)
+            {
+                if (this.animatorParameters.Contains(paramter))
+                    this.animator.SetBool(paramter, value);
+            }
+        }
+
+        public void UpdateAnimatorTrigger(int paramter)
+        {
+            if (this.animator != null)
+            {
+                if (this.animatorParameters.Contains(paramter))
+                    this.animator.SetTrigger(paramter);
+            }
+        }
+
+
+
+
     }
 
 
