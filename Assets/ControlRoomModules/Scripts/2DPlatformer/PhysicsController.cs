@@ -219,7 +219,16 @@ namespace ControlRoom
 
         void CastRaysBelow()
         {
-            float rayLength = (boundsHeight / 2) + RayOffset; 	
+			if (newPosition.y < -_smallValue)
+			{
+				Conditions.IsFalling = true;
+			}
+			else
+			{
+				Conditions.IsFalling = false;
+			}
+
+			float rayLength = (boundsHeight / 2) + RayOffset; 	
 
             if(newPosition.y<0)
             {

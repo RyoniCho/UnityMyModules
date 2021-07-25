@@ -14,6 +14,7 @@ namespace ControlRoom
         public int SuccessiveDashesLeft = 1;
         public float DashCooldown = 1f;
         public bool LimitedDashes = false;
+        public float AnimationEndDelay = 0.3f;
 
 
         private bool shouldKeepDashing = false;
@@ -27,6 +28,10 @@ namespace ControlRoom
         private float startTime = 0f;
         private float cooldownTimeStamp = 0f;
         private float lastDashAt = 0f;
+
+        private bool IsDashing = false;
+        private const string dashAnimationParamName = "Dash";
+        private int dashAnimParam;
 
         protected override void Initialize()
         {
@@ -131,6 +136,7 @@ namespace ControlRoom
         {
             while(true)
             {
+                IsDashing = true;
                 distanceTraveled = Vector3.Distance(initialPosition, this.transform.position);
 
                 if(controller.Conditions.IsCollidingLeft&&dashDirection.x<0f||
@@ -157,6 +163,8 @@ namespace ControlRoom
 
         public void StopDash()
         {
+            
+
             if (dashCoroutine != null)
             {
                 StopCoroutine(dashCoroutine);
@@ -171,6 +179,8 @@ namespace ControlRoom
             {
                 controller.SetHorizontalForce(0f);
             }
+
+            Invoke("StopDashAnimation", this.AnimationEndDelay);
 
             // we play our exit sound 
             //StopStartFeedbacks();
@@ -211,6 +221,22 @@ namespace ControlRoom
             }
 
             return true;
+        }
+
+        private void StopDashAnimation()
+        {
+            this.IsDashing = false;
+        }
+
+
+        protected override void InitializeAnimParam()
+        {
+            animationController.AddAnimatorParameterIfExists(dashAnimationParamName, out this.dashAnimParam, AnimatorControllerParameterType.Bool);
+        }
+
+        public override void UpdateAnimator()
+        {
+            animationController.UpdateAnimatorBool(this.dashAnimParam, this.IsDashing);
         }
 
 

@@ -18,6 +18,8 @@ namespace ControlRoom
         public bool CanFlip { get; set; }
         public bool IsFacingRight { get; set; }
 
+        private const string FallAnimationParameterName = "Fall";
+        private int FallAnimationParam;
 
         private void Awake() 
         {
@@ -27,10 +29,20 @@ namespace ControlRoom
             this.spriteRenderer = this.GetComponentInChildren<SpriteRenderer>();
 
             if(this.animationController!=null)
+            {
                 this.animationController.SetBricks(this.bricks);
+               
+            }
+               
 
             Initialize();
 
+        }
+
+        private void Start()
+        {
+            if(this.animationController!=null)
+                InitializeAnimationParam();
         }
 
         private void Initialize()
@@ -56,7 +68,9 @@ namespace ControlRoom
                 {
                     brick.UpdateFrame();
                 }
-            }   
+            }
+
+            UpdateAnimationParam();
         }
 
         public void Flip()
@@ -149,7 +163,22 @@ namespace ControlRoom
 
         public AnimationController AnimController { get { return this.animationController; } }
 
+        private void InitializeAnimationParam()
+        {
+            if(this.animationController==null)
+            {
+                Debug.LogError("Animation Controller is null(Agent)");
+                return;
+            }
 
+            this.animationController.AddAnimatorParameterIfExists(FallAnimationParameterName, out FallAnimationParam, AnimatorControllerParameterType.Bool);
+        }
+
+        private void UpdateAnimationParam()
+        {
+            if(this.animationController!=null)
+                this.animationController.UpdateAnimatorBool(FallAnimationParam, controller.Conditions.IsFalling);
+        }
 
     }
 }

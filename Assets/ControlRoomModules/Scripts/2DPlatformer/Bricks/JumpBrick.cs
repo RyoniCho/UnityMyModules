@@ -24,7 +24,7 @@ namespace ControlRoom
         
         public bool CanJumpStop { get; set; }
 
-        protected string _jumpingAnimationParameterName = "Jumping";
+        protected string _jumpingAnimationParameterName = "Jump";
         private string _doubleJumpingAnimationParameterName = "DoubleJumping";
         private string  _hitTheGroundAnimationParameterName = "HitTheGround";
         protected int _jumpingAnimationParameter;
@@ -82,7 +82,8 @@ namespace ControlRoom
 			if (controller.Conditions.IsGrounded)
 			{
 				lastTimeGrounded = Time.time;
-			}
+               
+            }
 
             // If the user releases the jump button and the character is jumping up and enough time since the initial jump has passed, then we make it stop jumping by applying a force down.
             if ( (jumpButtonPressTime != 0) 
@@ -90,8 +91,9 @@ namespace ControlRoom
 			    && (controller.Speed.y > Mathf.Sqrt(Mathf.Abs(controller.initialGravity))) 
 			    && (jumpButtonReleased))
 			{
-				jumpButtonReleased=false;	
-				if (JumpIsProportionalToThePressTime)	
+				jumpButtonReleased=false;
+                
+                if (JumpIsProportionalToThePressTime)	
 				{	
 					jumpButtonPressTime=0;
 					if (JumpReleaseForceFactor == 0f)
@@ -175,6 +177,10 @@ namespace ControlRoom
             controller.SetVerticalForce(Mathf.Sqrt( 2f * JumpHeight * Mathf.Abs(controller.initialGravity) ));
             jumpHappenedThisFrame = true;
 
+            if (animationController != null)
+                animationController.UpdateAnimatorTrigger(_jumpingAnimationParameter);
+
+
         }
 
         public void JumpStop()
@@ -219,6 +225,13 @@ namespace ControlRoom
             return true;
         }
 
+        protected override void InitializeAnimParam()
+        {
+            if(animationController!=null)
+                animationController.AddAnimatorParameterIfExists(_jumpingAnimationParameterName, out _jumpingAnimationParameter, AnimatorControllerParameterType.Trigger);
+        }
+
+       
     }
 }
 
