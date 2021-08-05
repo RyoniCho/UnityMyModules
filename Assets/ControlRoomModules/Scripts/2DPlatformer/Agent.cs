@@ -28,7 +28,9 @@ namespace ControlRoom
             this.animationController=this.GetComponentInChildren<ControlRoom.AnimationController>();
             this.spriteRenderer = this.GetComponentInChildren<SpriteRenderer>();
 
-            if(this.animationController!=null)
+            CheckControllerSettings();
+
+            if (this.animationController!=null)
             {
                 this.animationController.SetBricks(this.bricks);
                
@@ -178,6 +180,25 @@ namespace ControlRoom
         {
             if(this.animationController!=null)
                 this.animationController.UpdateAnimatorBool(FallAnimationParam, controller.Conditions.IsFalling);
+        }
+
+        private void CheckControllerSettings()
+        {
+
+            if(this.controller==null)
+            {
+                Debug.LogError($"{this.gameObject.name} : PhysicsController is not exists");
+            }
+            if (this.animationController == null)
+            {
+                Debug.LogError($"{this.gameObject.name} : AnimationController is not exists");
+            }
+            if (this.spriteRenderer == null)
+            {
+                Debug.LogError($"{this.gameObject.name} : SpriteRenderer is not exists");
+            }
+          
+
         }
 
     }

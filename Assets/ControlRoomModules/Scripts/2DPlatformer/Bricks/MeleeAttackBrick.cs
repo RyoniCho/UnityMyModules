@@ -18,7 +18,7 @@ namespace ControlRoom
         public float ActiveDuration = 0.3f;
         public LayerMask TargetLayerMask;
         public int DamageCaused;
-
+        public bool ShowGizmosWhenPlaying = false;
 
 
         private GameObject attackArea;
@@ -30,6 +30,7 @@ namespace ControlRoom
         private bool isAttacking = false;
         private const string attackAnimationParameterName = "Attack";
         private int attackAnimationParameter;
+        private Vector3 gizmoOffset;
 
         public enum AreaColliderType
         {
@@ -69,6 +70,7 @@ namespace ControlRoom
                 attackArea.transform.position = this.transform.position;
                 attackArea.transform.rotation = this.transform.rotation;
                 attackArea.transform.parent = this.transform;
+                attackArea.layer = this.agent.gameObject.layer;
 
                 switch(this.colliderType)
                 {
@@ -108,7 +110,7 @@ namespace ControlRoom
 
         private void EnableAttackArea()
         {
-            if (this.attackCollider != null)
+           if (this.attackCollider != null)
                 this.attackCollider.enabled = true;
         }
 
@@ -124,8 +126,15 @@ namespace ControlRoom
 
             isAttacking = true;
 
+            
+            if(controller.Conditions.IsFalling)
+            {
+                controller.GravityActive(false);
+                controller.Conditions.IsFalling = false;
+
+            }
+
             animationController.UpdateAnimatorTrigger(attackAnimationParameter);
-           
 
             yield return new WaitForSeconds(InitialDelay);
             EnableAttackArea();
@@ -134,6 +143,8 @@ namespace ControlRoom
             yield return new WaitForSeconds(ActiveDuration);
             DisableAttackArea();
             isAttacking = false;
+
+            controller.GravityActive(true);
         }
 
         public override void Flip()
@@ -149,7 +160,59 @@ namespace ControlRoom
             animationController.AddAnimatorParameterIfExists(attackAnimationParameterName, out attackAnimationParameter, AnimatorControllerParameterType.Trigger);
         }
 
-       
+        private void DrawGizmos()
+        {
+            gizmoOffset = AreaOffset;
+
+            Gizmos.color = Color.red;
+            if (this.colliderType== AreaColliderType.CircleCollider)
+            {
+                Gizmos.DrawWireSphere(this.transform.position + gizmoOffset, AreaSize.x / 2);
+            }
+            else if (this.colliderType == AreaColliderType.BoxCollider)
+            {
+                
+                DrawGizmoRectangle(this.transform.position + gizmoOffset, AreaSize, Color.red);
+            }
+        }
+
+        /// <summary>
+        /// Draws gizmos on selected if the app is not playing
+        /// </summary>
+        protected virtual void OnDrawGizmosSelected()
+        {
+            if(ShowGizmosWhenPlaying==false)
+            {
+                if (!Application.isPlaying)
+                {
+                    DrawGizmos();
+                }
+
+            }
+            else
+            {
+                DrawGizmos();
+            }
+            
+        }
+
+        private void DrawGizmoRectangle(Vector2 center, Vector2 size, Color color)
+        {
+          
+            Gizmos.color = color;
+
+            Vector3 v3TopLeft = new Vector3(center.x - size.x / 2, center.y + size.y / 2, 0);
+            Vector3 v3TopRight = new Vector3(center.x + size.x / 2, center.y + size.y / 2, 0); ;
+            Vector3 v3BottomRight = new Vector3(center.x + size.x / 2, center.y - size.y / 2, 0); ;
+            Vector3 v3BottomLeft = new Vector3(center.x - size.x / 2, center.y - size.y / 2, 0); ;
+
+            Gizmos.DrawLine(v3TopLeft, v3TopRight);
+            Gizmos.DrawLine(v3TopRight, v3BottomRight);
+            Gizmos.DrawLine(v3BottomRight, v3BottomLeft);
+            Gizmos.DrawLine(v3BottomLeft, v3TopLeft);
+        }
+
+
     }
 }
 
