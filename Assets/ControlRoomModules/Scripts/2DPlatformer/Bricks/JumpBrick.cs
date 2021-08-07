@@ -9,6 +9,7 @@ namespace ControlRoom
         public int NumberOfJumps = 2;
         public float JumpHeight = 3.025f;
         public int NumberOfJumpsLeft;
+        public bool ReadInput = true;
 
         [Header("Proportional jumps")]
 
@@ -50,6 +51,9 @@ namespace ControlRoom
 
         protected override void HandleInput()
         {
+            if (!ReadInput)
+                return;
+
             //if(InputManager.Instance.Jump.Down)
             if(Input.GetKeyDown(KeyCode.P))
             {

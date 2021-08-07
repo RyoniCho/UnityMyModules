@@ -15,6 +15,7 @@ namespace ControlRoom
         public float DashCooldown = 1f;
         public bool LimitedDashes = false;
         public float AnimationEndDelay = 0.3f;
+        public bool ReadInput = true;
 
 
         private bool shouldKeepDashing = false;
@@ -42,6 +43,8 @@ namespace ControlRoom
         protected override void HandleInput()
         {
             base.HandleInput();
+            if (!ReadInput)
+                return;
 
             if(Input.GetKeyDown(KeyCode.O))
             {

@@ -19,6 +19,7 @@ namespace ControlRoom
         public LayerMask TargetLayerMask;
         public int DamageCaused;
         public bool ShowGizmosWhenPlaying = false;
+        public bool ReadInput = true;
 
 
         private GameObject attackArea;
@@ -49,6 +50,10 @@ namespace ControlRoom
         protected override void HandleInput()
         {
             base.HandleInput();
+
+            if (!ReadInput)
+                return;
+
 
             if(Input.GetKeyDown(KeyCode.I))
             {
