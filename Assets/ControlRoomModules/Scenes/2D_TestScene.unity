@@ -708,6 +708,7 @@ GameObject:
   - component: {fileID: 615662664}
   - component: {fileID: 615662665}
   - component: {fileID: 615662666}
+  - component: {fileID: 615662667}
   m_Layer: 7
   m_Name: Bricks
   m_TagString: Untagged
@@ -760,7 +761,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e21e5ea6fa4ce4f88afcd6e8e5ddc5d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  WalkSpeed: 6
+  WalkSpeed: 4.5
   MovementSpeedMultiplier: 1
   PushSpeedMultiplier: 1
   StateSpeedMultiplier: 1
@@ -773,6 +774,29 @@ MonoBehaviour:
   ActiveAfterDeath: 0
   MinimumAirTimeBeforeFeedback: 0.2
   StopWalkingWhenCollidingWithAWall: 0
+--- !u!114 &615662667
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 615662663}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2918b25a252644e1af1ff1df961649a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  colliderType: 0
+  AreaSize: {x: 1.51, y: 2.14}
+  AreaOffset: {x: 1.37, y: 1.11}
+  InitialDelay: 0
+  ActiveDuration: 0.5
+  TargetLayerMask:
+    serializedVersion: 2
+    m_Bits: 256
+  DamageCaused: 0
+  ShowGizmosWhenPlaying: 0
+  ReadInput: 0
 --- !u!1 &712347020
 GameObject:
   m_ObjectHideFlags: 0
@@ -6449,6 +6473,9 @@ GameObject:
   - component: {fileID: 858692098}
   - component: {fileID: 858692097}
   - component: {fileID: 858692096}
+  - component: {fileID: 858692099}
+  - component: {fileID: 858692101}
+  - component: {fileID: 858692100}
   m_Layer: 7
   m_Name: EnemyTest
   m_TagString: Untagged
@@ -6603,7 +6630,7 @@ MonoBehaviour:
     - {fileID: 858692096}
     Transitions:
     - Decision: {fileID: 858692098}
-      TrueState: Jump
+      TrueState: Chase
       FalseState: 
   - StateName: Jump
     Actions:
@@ -6614,11 +6641,21 @@ MonoBehaviour:
       FalseState: Patrol
   - StateName: Attack
     Actions:
-    - {fileID: 858692097}
+    - {fileID: 858692099}
+    Transitions:
+    - Decision: {fileID: 858692098}
+      TrueState: Chase
+      FalseState: Patrol
+  - StateName: Chase
+    Actions:
+    - {fileID: 858692101}
     Transitions:
     - Decision: {fileID: 858692098}
       TrueState: 
       FalseState: Patrol
+    - Decision: {fileID: 858692100}
+      TrueState: Attack
+      FalseState: 
   ActionsFrequency: 0
   DecisionFrequency: 0
   TimeInThisState: 0
@@ -6635,8 +6672,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9422f116fc5df4b8fb88a05577c20dd4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  BoundsExtentsLeft: 8
-  BoundsExtentsRight: 8
+  BoundsExtentsLeft: 4
+  BoundsExtentsRight: 4
 --- !u!114 &858692097
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6662,11 +6699,50 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 258b7ed95e28c4c44a5df91c2154b699, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Radius: 1
+  Radius: 6.5
   TargetLayer:
     serializedVersion: 2
     m_Bits: 256
   DetectionOriginOffset: {x: 0, y: 0, z: 0}
+--- !u!114 &858692099
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 858692089}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f3af8dd4781048509cd6a0b095e9d73, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &858692100
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 858692089}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 741238b679b3047fd86384a7ba75b37d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Distance: 1.7
+  comparisonModes: 1
+--- !u!114 &858692101
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 858692089}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a250b161a39c49e689f1de1b6d11587, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetStopDistance: 1.7
 --- !u!1 &915738422
 GameObject:
   m_ObjectHideFlags: 0

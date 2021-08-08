@@ -45,6 +45,11 @@ namespace ControlRoom
         public override void OnEnterState()
         {
             base.OnEnterState();
+
+            EstablishBounds();
+
+            if(agent!=null)
+                this.direction = agent.IsFacingRight ? Vector2.right : Vector2.left;
         }
 
         public override void OnExitState()
