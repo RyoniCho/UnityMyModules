@@ -32,6 +32,7 @@ namespace ControlRoom
         private const string attackAnimationParameterName = "Attack";
         private int attackAnimationParameter;
         private Vector3 gizmoOffset;
+        private Rigidbody2D attackArea_rb;
 
         public enum AreaColliderType
         {
@@ -96,8 +97,8 @@ namespace ControlRoom
 
                 this.attackCollider.isTrigger = true;
 
-                Rigidbody2D rigidBody = this.attackArea.AddComponent<Rigidbody2D>();
-                rigidBody.isKinematic = true;
+                attackArea_rb = this.attackArea.AddComponent<Rigidbody2D>();
+                attackArea_rb.isKinematic = true;
 
                 damager = this.attackArea.AddComponent<OnDamage>();
                 damager.targetLayerMask = TargetLayerMask;
@@ -130,9 +131,11 @@ namespace ControlRoom
             if (isAttacking) { yield break; }
 
             isAttacking = true;
+            attackArea_rb.WakeUp();
 
-            
-            if(controller.Conditions.IsFalling)
+
+
+            if (controller.Conditions.IsFalling)
             {
                 controller.GravityActive(false);
                 controller.Conditions.IsFalling = false;
@@ -150,6 +153,8 @@ namespace ControlRoom
             isAttacking = false;
 
             controller.GravityActive(true);
+            attackArea_rb.Sleep();
+               
         }
 
         public override void Flip()
