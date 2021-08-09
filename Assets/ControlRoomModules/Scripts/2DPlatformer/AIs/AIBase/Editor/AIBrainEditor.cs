@@ -13,7 +13,7 @@ namespace ControlRoom
         protected ReorderableList _list;
         protected SerializedProperty _brainActive;
         //protected SerializedProperty _timeInThisState;
-        //protected SerializedProperty _target;
+        protected SerializedProperty _target;
         protected SerializedProperty _actionsFrequency;
         protected SerializedProperty _decisionFrequency;
 
@@ -25,7 +25,7 @@ namespace ControlRoom
 
             _brainActive = serializedObject.FindProperty("BrainActive");
             //_timeInThisState = serializedObject.FindProperty("TimeInThisState");
-            //_target = serializedObject.FindProperty("Target");
+            _target = serializedObject.FindProperty("Target");
             _actionsFrequency = serializedObject.FindProperty("ActionsFrequency");
             _decisionFrequency = serializedObject.FindProperty("DecisionFrequency");
         }
@@ -37,7 +37,7 @@ namespace ControlRoom
             _list.DoLayoutList();
             EditorGUILayout.PropertyField(_brainActive);
             //EditorGUILayout.PropertyField(_timeInThisState);
-            //EditorGUILayout.PropertyField(_target);
+            EditorGUILayout.PropertyField(_target);
             EditorGUILayout.PropertyField(_actionsFrequency);
             EditorGUILayout.PropertyField(_decisionFrequency);
             serializedObject.ApplyModifiedProperties();

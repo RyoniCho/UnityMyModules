@@ -6476,6 +6476,7 @@ GameObject:
   - component: {fileID: 858692099}
   - component: {fileID: 858692101}
   - component: {fileID: 858692100}
+  - component: {fileID: 858692102}
   m_Layer: 7
   m_Name: EnemyTest
   m_TagString: Untagged
@@ -6625,37 +6626,33 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   BrainActive: 1
   states:
-  - StateName: Patrol
-    Actions:
-    - {fileID: 858692096}
+  - StateName: Idle
+    Actions: []
     Transitions:
     - Decision: {fileID: 858692098}
       TrueState: Chase
       FalseState: 
-  - StateName: Jump
-    Actions:
-    - {fileID: 858692097}
-    Transitions:
-    - Decision: {fileID: 858692098}
-      TrueState: 
-      FalseState: Patrol
-  - StateName: Attack
-    Actions:
-    - {fileID: 858692099}
-    Transitions:
-    - Decision: {fileID: 858692098}
-      TrueState: Chase
-      FalseState: Patrol
   - StateName: Chase
     Actions:
     - {fileID: 858692101}
     Transitions:
-    - Decision: {fileID: 858692098}
-      TrueState: 
-      FalseState: Patrol
     - Decision: {fileID: 858692100}
       TrueState: Attack
       FalseState: 
+  - StateName: Attack
+    Actions:
+    - {fileID: 858692099}
+    Transitions:
+    - Decision: {fileID: 858692100}
+      TrueState: 
+      FalseState: Chase
+  - StateName: Jump
+    Actions:
+    - {fileID: 858692097}
+    Transitions:
+    - Decision: {fileID: 858692100}
+      TrueState: 
+      FalseState: Chase
   ActionsFrequency: 0
   DecisionFrequency: 0
   TimeInThisState: 0
@@ -6672,6 +6669,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9422f116fc5df4b8fb88a05577c20dd4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Label: 
   BoundsExtentsLeft: 4
   BoundsExtentsRight: 4
 --- !u!114 &858692097
@@ -6686,6 +6684,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ed5cbfcad7cb426892230429aea215d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Label: 
   MaxNumberOfJump: 1
 --- !u!114 &858692098
 MonoBehaviour:
@@ -6699,7 +6698,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 258b7ed95e28c4c44a5df91c2154b699, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Radius: 6.5
+  Label: 
+  Radius: 25
   TargetLayer:
     serializedVersion: 2
     m_Bits: 256
@@ -6716,6 +6716,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f3af8dd4781048509cd6a0b095e9d73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Label: 
 --- !u!114 &858692100
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6728,6 +6729,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 741238b679b3047fd86384a7ba75b37d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Label: 
   Distance: 1.7
   comparisonModes: 1
 --- !u!114 &858692101
@@ -6742,7 +6744,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a250b161a39c49e689f1de1b6d11587, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Label: 
   targetStopDistance: 1.7
+--- !u!114 &858692102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 858692089}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3931f62ff8974ec6ae8673adb865d7b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Label: 
+  MaxPossiblity: 100
+  RandomRatio: 50
 --- !u!1 &915738422
 GameObject:
   m_ObjectHideFlags: 0

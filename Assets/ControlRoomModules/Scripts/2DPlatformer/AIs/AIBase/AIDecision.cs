@@ -13,6 +13,7 @@ namespace ControlRoom
 
         public abstract bool Decide();
         public bool DecisionInProgress { get; set; }
+        public string Label;
 
         protected AIBrain brain;
 

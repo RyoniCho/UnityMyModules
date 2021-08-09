@@ -31,6 +31,12 @@ namespace ControlRoom
             return decisions;
         }
 
+        public AIAction[] GetAttachedActions()
+        {
+            AIAction[] actions = this.gameObject.GetComponentsInChildren<AIAction>();
+            return actions;
+        }
+
         private void Awake()
         {
             foreach (AIState state in states)

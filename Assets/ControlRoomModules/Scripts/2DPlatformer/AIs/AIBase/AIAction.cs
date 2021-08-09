@@ -7,6 +7,7 @@ namespace ControlRoom
     public abstract class AIAction : MonoBehaviour
     {
         protected AIBrain brain;
+        public string Label;
 
         public abstract void StartAction();
 
