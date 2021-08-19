@@ -85,13 +85,16 @@ namespace ControlRoom
 		private Vector2 horizontalRayCastFromBottom=Vector2.zero;
 		private Vector2 horizontalRayCastToTop=Vector2.zero;
 
+		private Vector2 aboveRayCastStart = Vector2.zero;
+		private Vector2 aboveRayCastEnd = Vector2.zero;
 
-        float boundsWidth;
+		float boundsWidth;
         float boundsHeight;
 
 
         RaycastHit2D[] belowHitsStorage;	
 		RaycastHit2D[] sideHitsStorage;
+		RaycastHit2D[] aboveHitsStorage;
 
 
 		public Vector2 Speed { get{ return speed; } }
@@ -104,6 +107,7 @@ namespace ControlRoom
             boxCollider=this.GetComponent<BoxCollider2D>();
             belowHitsStorage=new RaycastHit2D[numberOfVerticalRays];
 			sideHitsStorage=new RaycastHit2D[numberOfHorizontalRays];
+			aboveHitsStorage = new RaycastHit2D[numberOfVerticalRays];
 
 			Conditions = new PhysicsControllerConditions(); 
 
@@ -144,10 +148,11 @@ namespace ControlRoom
 				CastRayToRight();
 			
 			CastRaysBelow();
+			CastRaysAbove();
 
 
 			//MoveTransform
-            this.transform.Translate(newPosition, Space.Self);
+			this.transform.Translate(newPosition, Space.Self);
 
 			SetRaysParameters();
 			ComputeNewSpeed();
@@ -447,6 +452,71 @@ namespace ControlRoom
 			}
 
 
+		}
+
+		private void CastRaysAbove()
+        {
+			float rayLength = Conditions.IsGrounded ? RayOffset : newPosition.y;
+
+			rayLength += boundsHeight / 2;
+
+			bool hitConnected = false;
+
+			aboveRayCastStart = (boundsBottomLeftCorner + boundsTopLeftCorner) / 2;
+			aboveRayCastEnd = (boundsBottomRightCorner + boundsTopRightCorner) / 2;
+
+			aboveRayCastStart += (Vector2)transform.right * newPosition.x;
+			aboveRayCastEnd += (Vector2)transform.right * newPosition.x;
+
+			if (aboveHitsStorage.Length != numberOfVerticalRays)
+			{
+				aboveHitsStorage = new RaycastHit2D[numberOfVerticalRays];
+			}
+
+			float smallestDistance = float.MaxValue;
+
+			int collidingIndex = 0;
+			for (int i = 0; i < numberOfVerticalRays; i++)
+			{
+				Vector2 rayOriginPoint = Vector2.Lerp(aboveRayCastStart, aboveRayCastEnd, (float)i / (float)(numberOfVerticalRays - 1));
+
+				aboveHitsStorage[i] = Physics2D.Raycast(rayOriginPoint, transform.up, rayLength, PlatformMask);
+
+				if (aboveHitsStorage[i])
+				{
+					hitConnected = true;
+					collidingIndex = i;
+
+					//if (aboveHitsStorage[i].collider == ignoredCollider)
+					//{
+					//	break;
+					//}
+
+					if (aboveHitsStorage[i].distance < smallestDistance)
+					{
+						smallestDistance = aboveHitsStorage[i].distance;
+					}
+				}
+			}
+
+			if (hitConnected)
+			{
+				newPosition.y = smallestDistance - boundsHeight / 2;
+
+				if ((Conditions.IsGrounded) && (newPosition.y < 0))
+				{
+					newPosition.y = 0;
+				}
+
+				Conditions.IsCollidingAbove = true;
+
+				if (!Conditions.WasTouchingTheCeilingLastFrame)
+				{
+					speed = new Vector2(speed.x, 0f);
+				}
+
+				SetVerticalForce(0);
+			}
 		}
 
 		private void ComputeNewSpeed()
