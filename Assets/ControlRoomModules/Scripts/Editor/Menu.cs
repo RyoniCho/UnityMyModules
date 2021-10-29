@@ -7,12 +7,18 @@ namespace ControlRoom
 {
     static class Menu 
     {
-        [MenuItem("ControlRoom/SaveTableDataAtLocal")]
-        static void SaveTableDataAtLocal()
+        [MenuItem("ControlRoom/Build/BuildTableCSV")]
+        static void SaveCSVTableDataAtLocal()
         {
 
-            LocalizationDataManager.Instance.DownLoadAndSaveData();
-            ItemDataManager.Instance.DownLoadAndSaveData();
+            TableDataBuilder.BuildTableDataFromCSV();
+        }
+        [MenuItem("ControlRoom/Build/BuildTableDataBinary")]
+        static void BuildTableData_Binary()
+        {
+
+           
+            TableDataBuilder.BuildTableDataFromBinary();
         }
 
         [MenuItem("ControlRoom/ClearSaveData")]

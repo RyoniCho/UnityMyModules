@@ -135,7 +135,7 @@ public class LocalizationDataManager : SingletonBase<LocalizationDataManager>
     public void LoadData()
     {
 
-        TableDataLoader.StartDownload((int)TableManager.GoogleDocsID.LOCALIZATION, delegate (TableData data)
+        TableDataLoader.LoadData((int)TableManager.GoogleDocsID.LOCALIZATION, delegate (TableData data)
         {
             foreach (var tableData in data.dicTableData)
             {
@@ -160,9 +160,25 @@ public class LocalizationDataManager : SingletonBase<LocalizationDataManager>
 
     }
 
-    public void DownLoadAndSaveData()
+    public void LoadBinaryData()
     {
-        TableDataLoader.StartDownload((int)TableManager.GoogleDocsID.LOCALIZATION, null, true);
+        TableDataLoader.LoadData((int)TableManager.GoogleDocsID.LOCALIZATION, delegate (System.IO.BinaryReader reader)
+        {
+            
+
+            TLocalizationData tLocalization = new TLocalizationData();
+
+            tLocalization.ReadBinary(reader);
+            SetTableData(tLocalization.index.Value, new LocalizationData(tLocalization));
+
+            TableManager.Instance.LoadCompleteTableData(TableManager.GoogleDocsID.LOCALIZATION);
+            LoadComplete = true;
+
+            GetCurrentLanguageSettings();
+
+            if (listener != null)
+                listener.Invoke(false);
+        });
     }
 
     public void UpdateLanguageText(SystemLanguage language)
@@ -172,5 +188,22 @@ public class LocalizationDataManager : SingletonBase<LocalizationDataManager>
 
         if(listener!=null)
         listener.Invoke(true);
+    }
+
+    void ConvertAndWriteBinaryData(TableData data, System.IO.BinaryWriter writer)
+    {
+        foreach (var tableData in data.dicTableData)
+        {
+            TLocalizationData tlocalizationData = new TLocalizationData();
+
+            tlocalizationData.SetDataValues(tableData.Value);
+
+            tlocalizationData.WriteBinary(writer);
+        }
+    }
+
+    public void BuildBinaryData()
+    {
+        TableDataBuilder.DownloadCSVAndCreateBinaryFile((int)TableManager.GoogleDocsID.LOCALIZATION, ConvertAndWriteBinaryData);
     }
 }

@@ -50,23 +50,49 @@ public class ItemDataManager:SingletonBase<ItemDataManager>
 
     public void LoadData()
     {
-        TableDataLoader.StartDownload((int)TableManager.GoogleDocsID.ITEM, delegate (TableData data)
+        TableDataLoader.LoadData((int)TableManager.GoogleDocsID.ITEM, ConvertTableData);
+
+        TableManager.Instance.LoadCompleteTableData(TableManager.GoogleDocsID.ITEM);
+    }
+
+    public void LoadBinaryData()
+    {
+        TableDataLoader.LoadData((int)TableManager.GoogleDocsID.ITEM, ConverBinaryData);
+
+        TableManager.Instance.LoadCompleteTableData(TableManager.GoogleDocsID.ITEM);
+    }
+
+    void ConvertTableData(TableData data)
+    {
+        foreach (var tableData in data.dicTableData)
         {
-            foreach (var tableData in data.dicTableData)
-            {
+            TItemData tItemdata = new TItemData();
 
+            tItemdata.SetDataValues(tableData.Value);
+            SetItemData(tItemdata.itemIndex.Value, new ItemData(tItemdata));
+        }
 
-                TItemData tItemdata = new TItemData();
+    }
 
-                tItemdata.SetDataValues(tableData.Value);
-                SetItemData(tItemdata.itemIndex.Value, new ItemData(tItemdata));
+    void ConverBinaryData(System.IO.BinaryReader reader)
+    {
+        TItemData tItemData = new TItemData();
+        tItemData.ReadBinary(reader);
 
+        SetItemData(tItemData.itemIndex.Value, new ItemData(tItemData));
 
+    }
 
-            }
-           
-            TableManager.Instance.LoadCompleteTableData(TableManager.GoogleDocsID.ITEM);
-        });
+    void ConvertAndWriteBinaryData(TableData data,System.IO.BinaryWriter writer)
+    {
+        foreach (var tableData in data.dicTableData)
+        {
+            TItemData tItemdata = new TItemData();
+
+            tItemdata.SetDataValues(tableData.Value);
+
+            tItemdata.WriteBinary(writer);
+        }
     }
 
     void SetItemData(int itemId, ItemData itemdata)
@@ -74,9 +100,9 @@ public class ItemDataManager:SingletonBase<ItemDataManager>
         dicItemData[itemId] = itemdata;
     }
 
-    public void DownLoadAndSaveData()
+    public void BuildBinaryData()
     {
-        TableDataLoader.StartDownload((int)TableManager.GoogleDocsID.ITEM, null, true);
+        TableDataBuilder.DownloadCSVAndCreateBinaryFile((int)TableManager.GoogleDocsID.ITEM, ConvertAndWriteBinaryData);
     }
 
 }

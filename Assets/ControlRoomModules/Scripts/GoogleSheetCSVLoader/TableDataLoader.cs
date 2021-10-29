@@ -6,360 +6,151 @@ using UnityEngine.Networking;
 
 namespace ControlRoom
 {
-    public class TableDataLoader: MonoBehaviour
+    public class TableDataLoader : MonoBehaviour
     {
-        public const string baseUrl= "https://docs.google.com/spreadsheet/pub?key={0}&single=true&output=csv&gid={1}";
+        public const string baseUrl = "https://docs.google.com/spreadsheet/pub?key={0}&single=true&output=csv&gid={1}";
+        public static bool OnlineMode = false;
 
         private TableData data;
+        private static TableDataLoader loader;
+        public static TableDataLoader Loader
+        {
+            get
+            {
+                if(loader == null)
+                {
+                    GameObject obj = TableManager.Instance.gameObject;
+                    loader = obj.GetComponent<TableDataLoader>();
+
+                    if (loader == null)
+                        loader = obj.AddComponent<TableDataLoader>();
+                  
+                }
+                return loader;
+            }
+        }
+            
     
         public delegate void CallBack(TableData tData);
+        public delegate void GoogleSheetDownloadCallback(string rawText);
+        public delegate void BinaryLoadCallback(System.IO.BinaryReader reader);
 
-        public static void StartDownload(int docsId,CallBack callBack,bool saveData=false)
+        
+        private static void LoadOnlineTableDataFromGoogleSheet(int docsId, CallBack callBack)
         {
-            GameObject obj = TableManager.Instance.gameObject;
-            var dataLoader= obj.AddComponent<TableDataLoader>();
-
-            dataLoader.RequestToLoadGoogleDocs(docsId, callBack,saveData);
+            Loader.LoadOnlineCSVData(docsId, callBack);
         }
 
-        void RequestToLoadGoogleDocs(int docsId, CallBack callBack,bool saveData=false)
+        private static void LoadTableDataFromCSVFile(int docsId, CallBack callBack)
         {
-            if(TableManager.Instance.IsOnlineLiveLoadMode||saveData)
-                StartCoroutine(LoadGoogleDocs(docsId, callBack,saveData));
+            Loader.LoadCSVFile(docsId, callBack);
+        }
+
+        private static void LoadTableDataFromBinaryFile(int docsId, BinaryLoadCallback callback)
+        {
+            Loader.LoadBinaryFile(docsId, callback);
+        }
+
+        public static void DownloadGoogleDocs(int docsId, GoogleSheetDownloadCallback callback)
+        {
+            Loader.DownloadOnlineCSV(docsId, callback);
+        }
+
+        public static void LoadData(int docsId,CallBack callback)
+        {
+            if (OnlineMode)
+                LoadOnlineTableDataFromGoogleSheet(docsId, callback);
+            else
+                LoadTableDataFromCSVFile(docsId, callback);
+        }
+
+        public static void LoadData(int docsId, BinaryLoadCallback callback)
+        {
+            LoadTableDataFromBinaryFile(docsId, callback);
+        }
+
+        void DownloadOnlineCSV(int docsId, GoogleSheetDownloadCallback callback)
+        {
+            StartCoroutine(RequestToDownloadGoogleDocs(docsId, callback));
+        }
+
+        void LoadOnlineCSVData(int docsId, CallBack callback)
+        {
+            StartCoroutine(RequestToDownloadGoogleDocs(docsId, (string downloadedText) =>
+            {
+                data = new TableData();
+                data.LoadRawCSVText(downloadedText);
+                callback(data);
+
+            }));
+        }
+
+        void LoadCSVFile(int docsId,CallBack callback)
+        {
+            var text = Resources.Load<TextAsset>(string.Format("Table/{0}", ((TableManager.GoogleDocsID)docsId).ToString().ToLower()));
+            if (text != null)
+            {
+                data = new TableData();
+
+                data.LoadRawCSVText(text.text);
+                callback(data);
+            }
             else
             {
-                var text = Resources.Load<TextAsset>(string.Format("Table/{0}", ((TableManager.GoogleDocsID)docsId).ToString().ToLower()));
-                if(text!=null)
-                {
-                    data = new TableData();
-                    
-                    data.LoadRawText(text.text);
-                    callBack(data);
-                }
-                else
-                {
-                    Debug.LogError(string.Format("{0} - local docs data could not loaded", docsId));
-                }
-
-
+                Debug.LogError(string.Format("{0} - local docs data could not loaded", docsId));
             }
         }
 
+        void LoadBinaryFile(int docsId, BinaryLoadCallback callback)
+        {
+            var binPath = $"{Application.dataPath}/Resources/Table/{((TableManager.GoogleDocsID)docsId).ToString().ToLower()}.bin";
+            try
+            {
+                var bytes = System.IO.File.ReadAllBytes(binPath);
+                using (var memoryStream = new System.IO.MemoryStream(bytes))
+                {
+                    using (var reader = new System.IO.BinaryReader(memoryStream))
+                    {
+                        while (memoryStream.Position < memoryStream.Length)
+                        {
+                            callback(reader);
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                Debug.LogError(string.Format("{0} - local Binary data could not loaded", docsId));
+            }
+           
+        }
 
-        IEnumerator LoadGoogleDocs(int docsId,CallBack callBack,bool saveData=false)
+
+        IEnumerator RequestToDownloadGoogleDocs(int docsId, GoogleSheetDownloadCallback callBack)
         {
             string docsKey=TableManager.Instance.docsKey;
 
             string url = string.Format(baseUrl, docsKey, docsId);
             UnityWebRequest request = UnityWebRequest.Get(url);
-
+          
 
             yield return request.SendWebRequest();
 
             if(request.result==UnityWebRequest.Result.ConnectionError||request.result==UnityWebRequest.Result.ProtocolError)
             {
                 Debug.LogError("Network Error");
-
             }
             else
             {
-                if(saveData)
-                {
-                    //Table Directory Check
-                    if(!System.IO.Directory.Exists(Application.dataPath+"/Resources/Table"))
-                    {
-                        System.IO.Directory.CreateDirectory(Application.dataPath + "/Resources/Table");
-                    }
-
-                    string path = string.Format("{0}/Resources/Table/{1}.csv", Application.dataPath, ((TableManager.GoogleDocsID)docsId).ToString().ToLower());
-                    System.IO.File.WriteAllText(path, request.downloadHandler.text);
-                    Debug.Log("Table Save:" + path);
-                }
-                else
-                {
-                    data = new TableData();
-                    data.LoadRawText(request.downloadHandler.text);
-
-                    callBack(data);
-                }
-
-            
+                callBack(request.downloadHandler.text);
+                
             }
 
         }
 
 
     }
-    public class DataForm 
-    {
-        protected List<IValue> valueList = new List<IValue>();
-
-        public void AddValue(IValue value)
-        {
-            valueList.Add(value);
-        }
-
-
-        public void SetDataValues(Dictionary<string,string> row)
-        {
-            foreach(var value in valueList)
-            {
-                value.Load(row);
-            }
-        }
-    }
-
-
-    public interface IValue
-    {
-        string Name { get; }
-
-        bool Load(Dictionary<string, string> row);
-    }
-
-    public class TInt: IValue
-    {
-        private string name;
-        private int value;
-
-        public string Name { get { return name; } }
-        public int Value { get { return value; } }
-
-        public TInt(string name,DataForm dataform)
-        {
-            this.name = name;
-            dataform.AddValue(this);
-        }
-
-        bool IValue.Load(Dictionary<string,string> row)
-        {
-            string strValue;
-            bool get = row.TryGetValue(this.name, out strValue);
-
-            if(get)
-            {
-                try
-                {
-                    this.value = int.Parse(strValue);
-                }
-                catch
-                {
-                    Debug.LogError("ERROR:" + this.name + "is not integer value");
-                    return false;
-                }
-
-            }
-            else
-            {
-                Debug.LogError("ERROR:" + this.name + "is not found in column");
-                return false;
-            }
-            return true;
-        }
-
-    }
-
-    public class TString: IValue
-    {
-        private string name;
-        private string value;
-
-        public string Name { get { return this.name; } }
-        public string Value { get { return this.value; } }
-
-        public TString(string name,DataForm dataForm)
-        {
-            this.name = name;
-            dataForm.AddValue(this);
-        }
-
-        bool IValue.Load(Dictionary<string, string> row)
-        {
-            string strValue;
-            bool get = row.TryGetValue(this.name, out strValue);
-
-            if (get)
-            {
-                try
-                {
-                    this.value = strValue;
-                }
-                catch
-                {
-                    Debug.LogError("ERROR:" + this.name + "is not integer value");
-                    return false;
-                }
-
-            }
-            else
-            {
-                Debug.LogError("ERROR:" + this.name + "is not found in column");
-                return false;
-            }
-            return true;
-        }
-
-    }
-
-    public class TFloat : IValue
-    {
-        private string name;
-        private float value;
-
-        public string Name { get { return this.name; } }
-        public float Value { get { return this.value; } }
-
-        public TFloat(string name,DataForm dataForm)
-        {
-            this.name = name;
-            dataForm.AddValue(this);
-        }
-
-        bool IValue.Load(Dictionary<string, string> row)
-        {
-            string strValue;
-            bool get = row.TryGetValue(this.name, out strValue);
-
-            if (get)
-            {
-                try
-                {
-                    this.value = float.Parse(strValue);
-                }
-                catch
-                {
-                    Debug.LogError("ERROR:" + this.name + "is not integer value");
-                    return false;
-                }
-
-            }
-            else
-            {
-                Debug.LogError("ERROR:" + this.name + "is not found in column");
-                return false;
-            }
-            return true;
-        }
-
-    }
-
-    public class TDouble: IValue
-    {
-        private string name;
-        private double value;
-
-        public string Name { get { return this.name; } }
-        public double Value { get { return this.value; } }
-
-        public TDouble (string name,DataForm dataForm)
-        {
-            this.name = name;
-            dataForm.AddValue(this);
-        }
-
-        bool IValue.Load(Dictionary<string, string> row)
-        {
-            string strValue;
-            bool get = row.TryGetValue(this.name, out strValue);
-
-            if (get)
-            {
-                try
-                {
-                    this.value = double.Parse(strValue);
-                }
-                catch
-                {
-                    Debug.LogError("ERROR:" + this.name + "is not integer value");
-                    return false;
-                }
-
-            }
-            else
-            {
-                Debug.LogError("ERROR:" + this.name + "is not found in column");
-                return false;
-            }
-            return true;
-        }
-    }
-    public class TBool: IValue
-    {
-        private string name;
-        private bool value;
-
-        public string Name { get { return this.name; } }
-        public bool Value { get { return this.value; } }
-
-        public TBool(string name, DataForm dataForm)
-        {
-            this.name = name;
-            dataForm.AddValue(this);
-        }
-        bool IValue.Load(Dictionary<string, string> row)
-        {
-            string strValue;
-            bool get = row.TryGetValue(this.name, out strValue);
-            if(get)
-            {
-                try
-                {
-                    this.value = bool.Parse(strValue.ToLower()); 
-                }
-                catch
-                {
-                    Debug.LogError("ERROR:" + this.name + "is not bool value");
-                    return false;
-                }
-            }
-            else
-            {
-                Debug.LogError("ERROR:" + this.name + "is not found in column");
-                return false;
-            }
-
-            return true;
-        }
-    }
-    public class TDateTime: IValue
-    {
-        private string name;
-        private DateTime value;
-
-        public string Name { get { return this.name; } }
-        public DateTime Value { get { return this.value; } }
-        public TDateTime(string name,DataForm dataForm)
-        {
-            this.name = name;
-            dataForm.AddValue(this);
-        }
-
-        bool IValue.Load(Dictionary<string, string> row)
-        {
-            string strValue;
-            bool get = row.TryGetValue(this.name, out strValue);
-
-            if (get)
-            {
-                try
-                {
-                    this.value = DateTime.Parse(strValue);
-                }
-                catch
-                {
-                    Debug.LogError("ERROR:" + this.name + "is not DateTime value");
-                    return false;
-                }
-
-            }
-            else
-            {
-                Debug.LogError("ERROR:" + this.name + "is not found in column");
-                return false;
-            }
-            return true;
-        }
-    }
+    
 
 
 }

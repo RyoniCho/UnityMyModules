@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Diagnostics;
+
 namespace ControlRoom
 {
     public class TableManager : SingletonBase<TableManager>
@@ -10,6 +12,8 @@ namespace ControlRoom
 
         private HashSet<GoogleDocsID> hsTotalTable = new HashSet<GoogleDocsID>();
         private HashSet<GoogleDocsID> hsLoadCompleteTable = new HashSet<GoogleDocsID>();
+        private Stopwatch stopwatch;
+
         public enum GoogleDocsID
         {
             LOCALIZATION= 1724096133,
@@ -29,14 +33,37 @@ namespace ControlRoom
 
 			DontDestroyOnLoad(this.gameObject);
 
+            stopwatch = new Stopwatch();
+
        }
 
-       IEnumerator LoadAllTable()
-       {
-           RegisterTableDataForLoad();
+        public void LoadTableCSV()
+        {
+            StartCoroutine(LoadAllTable());
+        }
 
-            LocalizationDataManager.Instance.LoadData();
-            ItemDataManager.Instance.LoadData();
+        public void LoadTableBinary()
+        {
+            StartCoroutine(LoadAllTable(true));
+        }
+
+
+       IEnumerator LoadAllTable(bool binaryLoad=false)
+       {
+            stopwatch.Start();
+            RegisterTableDataForLoad();
+
+            if(binaryLoad)
+            {
+                LocalizationDataManager.Instance.LoadBinaryData();
+                ItemDataManager.Instance.LoadBinaryData();
+            }
+            else
+            {
+                LocalizationDataManager.Instance.LoadData();
+                ItemDataManager.Instance.LoadData();
+            }
+            
           
             
 
@@ -44,7 +71,11 @@ namespace ControlRoom
             {
                 if (LoadComplete)
                 {
-                    //currentGameState = GAMESTATE.TABLELOAD_COMPLETE; 
+                    //currentGameState = GAMESTATE.TABLELOAD_COMPLETE;
+                    stopwatch.Stop();
+                    UnityEngine.Debug.Log($"Table Load ElapsTime:{stopwatch.ElapsedMilliseconds} / BinaryLoad: {binaryLoad}");
+                    //var d = LocalizationDataManager.Instance.GetLocalizationData(10001);
+                    //UnityEngine.Debug.Log($"Local 1001: {d}");
                     yield break;
                 }
 
