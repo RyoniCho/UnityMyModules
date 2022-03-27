@@ -6629,6 +6629,9 @@ MonoBehaviour:
   - StateName: Idle
     Actions: []
     Transitions:
+    - Decision: {fileID: 858692102}
+      TrueState: Chase
+      FalseState: Jump
     - Decision: {fileID: 858692098}
       TrueState: Chase
       FalseState: 
@@ -6638,6 +6641,9 @@ MonoBehaviour:
     Transitions:
     - Decision: {fileID: 858692100}
       TrueState: Attack
+      FalseState: 
+    - Decision: {fileID: 858692102}
+      TrueState: Jump
       FalseState: 
   - StateName: Attack
     Actions:
@@ -6653,8 +6659,11 @@ MonoBehaviour:
     - Decision: {fileID: 858692100}
       TrueState: 
       FalseState: Chase
+    - Decision: {fileID: 858692102}
+      TrueState: Idle
+      FalseState: 
   ActionsFrequency: 0
-  DecisionFrequency: 0
+  DecisionFrequency: 2.5
   TimeInThisState: 0
   Target: {fileID: 0}
 --- !u!114 &858692096
@@ -6852,7 +6861,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   NumberOfJumps: 2
-  JumpHeight: 3.025
+  JumpHeight: 4
   NumberOfJumpsLeft: 0
   ReadInput: 1
   JumpIsProportionalToThePressTime: 1
