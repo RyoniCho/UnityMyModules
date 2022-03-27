@@ -4,24 +4,13 @@ using UnityEngine;
 using System;
 namespace ControlRoom
 {
-    // interface IDataManager
-    // {
-    //     void RegisterDataManager();
-    // }
+    public interface ITableDataManager
+    {
+        public void LoadData();
+        public void LoadBinaryData();
+        public void BuildBinaryData();
 
-    // public class DataManager : SingletonBase<DataManager>,IDataManager
-    // {
-    //     void IDataManager.RegisterDataManager()
-    //     {
-            
-    //     }
-    // }
-
-    // public class exp :DataManager
-    // {
-
-    // }
-
+    }
     public class TableData 
     {
        

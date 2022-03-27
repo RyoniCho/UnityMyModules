@@ -7,22 +7,59 @@ namespace ControlRoom
 {
     public class TableManager : SingletonBase<TableManager>
     {
-        public bool IsOnlineLiveLoadMode=false;
-        public string docsKey = "=======Google Docs Key Here========";
+
+
+        public bool IsOnlineLiveLoadMode = true;
+
+
+        /// <summary>
+        /// Google Docs ID
+        ///
+        /// When you check google spread sheet url,
+        /// ex: https://docs.google.com/spreadsheets/d/d3j3kdi/edit#gid=1391482172
+        /// 
+        /// "d3j3kdi" is google docs key.
+        /// 1391482172 is sheet id. you write your sheet id below.
+        /// 
+        /// </summary>
+
+
+        public const string docsKey = "==Google Docs Key Here==";
+        public enum GoogleDocsID
+        {
+
+            LOCALIZATION = 1724096133,
+            ITEM = 0,
+
+        }
+
+        /// <summary>
+        /// Table Data manager (Singleton Design) Registration.
+        /// </summary>
+        public List<ITableDataManager> listTableDataManager = new List<ITableDataManager>();
+        private bool isSetTableDataManager = false;
+
+        public void SetTableDataManager()
+        {
+            if (isSetTableDataManager)
+                return;
+
+            listTableDataManager.Add(LocalizationDataManager.Instance);
+
+            isSetTableDataManager = true;
+
+        }
+
+
 
         private HashSet<GoogleDocsID> hsTotalTable = new HashSet<GoogleDocsID>();
         private HashSet<GoogleDocsID> hsLoadCompleteTable = new HashSet<GoogleDocsID>();
+        
         private Stopwatch stopwatch;
 
-        public enum GoogleDocsID
+        
+        protected override void Awake() 
         {
-            LOCALIZATION= 1724096133,
-            ITEM =0,
-                
-        }
-
-       protected override void Awake() 
-       {
            
            base.Awake();
            if(Instance!=this)
@@ -32,6 +69,8 @@ namespace ControlRoom
 			}
 
 			DontDestroyOnLoad(this.gameObject);
+
+            SetTableDataManager();
 
             stopwatch = new Stopwatch();
 
@@ -55,27 +94,32 @@ namespace ControlRoom
 
             if(binaryLoad)
             {
-                LocalizationDataManager.Instance.LoadBinaryData();
-                ItemDataManager.Instance.LoadBinaryData();
+
+                foreach(var manager in listTableDataManager)
+                {
+                    manager.LoadBinaryData();
+                }
+               
             }
             else
             {
-                LocalizationDataManager.Instance.LoadData();
-                ItemDataManager.Instance.LoadData();
+                foreach(var manager in listTableDataManager)
+                {
+                    manager.LoadData();
+                }
+               
+             
             }
-            
-          
             
 
             while (true)
             {
                 if (LoadComplete)
                 {
-                    //currentGameState = GAMESTATE.TABLELOAD_COMPLETE;
+                   
                     stopwatch.Stop();
                     UnityEngine.Debug.Log($"Table Load ElapsTime:{stopwatch.ElapsedMilliseconds} / BinaryLoad: {binaryLoad}");
-                    //var d = LocalizationDataManager.Instance.GetLocalizationData(10001);
-                    //UnityEngine.Debug.Log($"Local 1001: {d}");
+                   
                     yield break;
                 }
 
@@ -119,6 +163,33 @@ namespace ControlRoom
         {
             hsLoadCompleteTable.Add(id);
         }
+
+        public void BuildBinaryDataAll()
+        {
+            SetTableDataManager();
+
+            if (stopwatch == null)
+                stopwatch = new Stopwatch();
+
+
+            UnityEngine.Debug.Log("Build Binary Data Start");
+
+            stopwatch.Start();
+            
+            for (int i= 0; i< listTableDataManager.Count;i++)
+            {
+              
+                listTableDataManager[i].BuildBinaryData();
+               
+            }
+
+            stopwatch.Stop();
+           
+            UnityEngine.Debug.Log($"Build Binary Data End : {stopwatch.ElapsedMilliseconds}");
+
+
+        }
+
 
     }
 

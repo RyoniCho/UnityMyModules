@@ -56,7 +56,7 @@ public class LocalizationData
     }
 }
 
-public class LocalizationDataManager : SingletonBase<LocalizationDataManager>
+public class LocalizationDataManager : SingletonBase<LocalizationDataManager>,ITableDataManager
 {
     public System.Action<bool> listener;
     public bool LoadComplete = false;
@@ -135,41 +135,9 @@ public class LocalizationDataManager : SingletonBase<LocalizationDataManager>
     public void LoadData()
     {
 
-        TableDataLoader.LoadData((int)TableManager.GoogleDocsID.LOCALIZATION, delegate (TableData data)
+        TableDataLoader.LoadData((int)TableManager.GoogleDocsID.LOCALIZATION, (TableData data) =>
         {
-            foreach (var tableData in data.dicTableData)
-            {
-
-
-                TLocalizationData tLocalization = new TLocalizationData();
-
-                tLocalization.SetDataValues(tableData.Value);
-                SetTableData(tLocalization.index.Value, new LocalizationData(tLocalization));
-
-            }
-
-            TableManager.Instance.LoadCompleteTableData(TableManager.GoogleDocsID.LOCALIZATION);
-            LoadComplete = true;
-
-            GetCurrentLanguageSettings();
-
-            if(listener!=null)
-            listener.Invoke(false);
-        });
-
-
-    }
-
-    public void LoadBinaryData()
-    {
-        TableDataLoader.LoadData((int)TableManager.GoogleDocsID.LOCALIZATION, delegate (System.IO.BinaryReader reader)
-        {
-            
-
-            TLocalizationData tLocalization = new TLocalizationData();
-
-            tLocalization.ReadBinary(reader);
-            SetTableData(tLocalization.index.Value, new LocalizationData(tLocalization));
+            ConvertTableData(data);
 
             TableManager.Instance.LoadCompleteTableData(TableManager.GoogleDocsID.LOCALIZATION);
             LoadComplete = true;
@@ -179,7 +147,10 @@ public class LocalizationDataManager : SingletonBase<LocalizationDataManager>
             if (listener != null)
                 listener.Invoke(false);
         });
+
+       
     }
+
 
     public void UpdateLanguageText(SystemLanguage language)
     {
@@ -190,20 +161,57 @@ public class LocalizationDataManager : SingletonBase<LocalizationDataManager>
         listener.Invoke(true);
     }
 
-    void ConvertAndWriteBinaryData(TableData data, System.IO.BinaryWriter writer)
+    public void LoadBinaryData()
     {
-        foreach (var tableData in data.dicTableData)
+        TableDataLoader.LoadData((int)TableManager.GoogleDocsID.LOCALIZATION, (System.IO.BinaryReader reader) =>
         {
-            TLocalizationData tlocalizationData = new TLocalizationData();
+            ConverBinaryData(reader);
+            TableManager.Instance.LoadCompleteTableData(TableManager.GoogleDocsID.LOCALIZATION);
+            LoadComplete = true;
 
-            tlocalizationData.SetDataValues(tableData.Value);
+            GetCurrentLanguageSettings();
 
-            tlocalizationData.WriteBinary(writer);
-        }
+            if (listener != null)
+                listener.Invoke(false);
+        });
     }
 
     public void BuildBinaryData()
     {
         TableDataBuilder.DownloadCSVAndCreateBinaryFile((int)TableManager.GoogleDocsID.LOCALIZATION, ConvertAndWriteBinaryData);
+    }
+
+    void ConvertTableData(TableData data)
+    {
+        foreach (var tableData in data.dicTableData)
+        {
+            TLocalizationData tLocalization = new TLocalizationData();
+
+            tLocalization.SetDataValues(tableData.Value);
+            SetTableData(tLocalization.index.Value, new LocalizationData(tLocalization));
+
+        }
+
+    }
+
+    void ConverBinaryData(System.IO.BinaryReader reader)
+    {
+        TLocalizationData tLocalizationData = new TLocalizationData();
+        tLocalizationData.ReadBinary(reader);
+
+        SetTableData(tLocalizationData.index.Value, new LocalizationData(tLocalizationData));
+
+    }
+
+    void ConvertAndWriteBinaryData(TableData data, System.IO.BinaryWriter writer)
+    {
+        foreach (var tableData in data.dicTableData)
+        {
+            TLocalizationData tLocalizationData = new TLocalizationData();
+
+            tLocalizationData.SetDataValues(tableData.Value);
+
+            tLocalizationData.WriteBinary(writer);
+        }
     }
 }

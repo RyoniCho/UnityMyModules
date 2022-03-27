@@ -63,8 +63,8 @@ namespace ControlRoom
 
         public static void BuildTableDataFromBinary()
         {
-            ItemDataManager.Instance.BuildBinaryData();
-            LocalizationDataManager.Instance.BuildBinaryData();
+            TableManager.Instance.BuildBinaryDataAll();
+            
         }
 
       

@@ -9,7 +9,7 @@ namespace ControlRoom
     public class TableDataLoader : MonoBehaviour
     {
         public const string baseUrl = "https://docs.google.com/spreadsheet/pub?key={0}&single=true&output=csv&gid={1}";
-        public static bool OnlineMode = false;
+        public static bool OnlineMode = true;
 
         private TableData data;
         private static TableDataLoader loader;
@@ -128,7 +128,7 @@ namespace ControlRoom
 
         IEnumerator RequestToDownloadGoogleDocs(int docsId, GoogleSheetDownloadCallback callBack)
         {
-            string docsKey=TableManager.Instance.docsKey;
+            string docsKey=TableManager.docsKey;
 
             string url = string.Format(baseUrl, docsKey, docsId);
             UnityWebRequest request = UnityWebRequest.Get(url);

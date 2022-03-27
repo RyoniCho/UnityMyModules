@@ -38,7 +38,7 @@ public class ItemData
 }
 
 
-public class ItemDataManager:SingletonBase<ItemDataManager>
+public class ItemDataManager:SingletonBase<ItemDataManager>,ITableDataManager
 {
     Dictionary<int, ItemData> dicItemData = new Dictionary<int, ItemData>();
 
@@ -50,16 +50,20 @@ public class ItemDataManager:SingletonBase<ItemDataManager>
 
     public void LoadData()
     {
-        TableDataLoader.LoadData((int)TableManager.GoogleDocsID.ITEM, ConvertTableData);
-
-        TableManager.Instance.LoadCompleteTableData(TableManager.GoogleDocsID.ITEM);
+        TableDataLoader.LoadData((int)TableManager.GoogleDocsID.ITEM, (TableData data) =>
+        {
+            ConvertTableData(data);
+            TableManager.Instance.LoadCompleteTableData(TableManager.GoogleDocsID.ITEM);
+        });
     }
 
     public void LoadBinaryData()
     {
-        TableDataLoader.LoadData((int)TableManager.GoogleDocsID.ITEM, ConverBinaryData);
-
-        TableManager.Instance.LoadCompleteTableData(TableManager.GoogleDocsID.ITEM);
+        TableDataLoader.LoadData((int)TableManager.GoogleDocsID.ITEM, (System.IO.BinaryReader reader) =>
+        {
+            ConverBinaryData(reader);
+            TableManager.Instance.LoadCompleteTableData(TableManager.GoogleDocsID.ITEM);
+        });
     }
 
     void ConvertTableData(TableData data)
@@ -83,7 +87,7 @@ public class ItemDataManager:SingletonBase<ItemDataManager>
 
     }
 
-    void ConvertAndWriteBinaryData(TableData data,System.IO.BinaryWriter writer)
+    void ConvertAndWriteBinaryData(TableData data, System.IO.BinaryWriter writer)
     {
         foreach (var tableData in data.dicTableData)
         {
@@ -104,5 +108,6 @@ public class ItemDataManager:SingletonBase<ItemDataManager>
     {
         TableDataBuilder.DownloadCSVAndCreateBinaryFile((int)TableManager.GoogleDocsID.ITEM, ConvertAndWriteBinaryData);
     }
+
 
 }
