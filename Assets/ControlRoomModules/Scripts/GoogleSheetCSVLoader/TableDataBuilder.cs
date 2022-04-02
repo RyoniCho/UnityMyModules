@@ -1,11 +1,14 @@
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
+using System.Linq;
 
 namespace ControlRoom
 {
     public static class TableDataBuilder 
-    {
+    { 
         public delegate void BinaryBuildCallback(TableData tData, System.IO.BinaryWriter writer);
 
         private static void DownloadCSVAndCreateFile(int docsId)
@@ -68,6 +71,23 @@ namespace ControlRoom
         }
 
       
+    }
+
+    [InitializeOnLoad]
+    public class AddDefineSymbols : Editor
+    {
+        public static readonly string[] Symbols = new string[] { "TABLE_DATA_BUILDER" };
+ 
+        static AddDefineSymbols()
+        {
+            string definesString = PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
+            List<string> allDefines = definesString.Split(';').ToList();
+            allDefines.AddRange(Symbols.Except(allDefines));
+
+            PlayerSettings.SetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup,
+             string.Join(";", allDefines.ToArray()));
+
+        }
     }
 }
 

@@ -9,12 +9,11 @@ namespace ControlRoom
 {
     static class BatchBuilder
     {
+
         static string[] SCENES = 
         {
             "Assets/Scenes/SampleScene.unity",
         };
-
-
 
 
         static string APP_NAME = "==APP NAME HERE==";
@@ -55,7 +54,7 @@ namespace ControlRoom
 -CustomArg:BuildPath=/Users/cho-eul-yeon/PrivateProject/Test/Build/?Version=1.0.0?VersionCode=1?UseAppBundle=True
 */
 
-        static void Build_AOS()
+        public static void Build_AOS()
         {
             Debug.Log($"AUTOBUILDER: Build {APP_NAME} AOS");
             if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.Android)
@@ -63,34 +62,66 @@ namespace ControlRoom
                 throw new Exception("Invalid Platform");
             }
 
-            string buildPath = CommandLineReader.GetCustomArgument("BuildPath");
+            
             string version = CommandLineReader.GetCustomArgument("Version");
             string bundleVersionCode = CommandLineReader.GetCustomArgument("VersionCode");
+            string buildPath = CommandLineReader.GetCustomArgument("BuildPath");
             string useAppBundle = CommandLineReader.GetCustomArgument("UseAppBundle");
             string isDebugMode = CommandLineReader.GetCustomArgument("IsDebugMode");
-            string isTableOnlineMode = CommandLineReader.GetCustomArgument("isTableOnlineMode");
+
+            string androidKeyStoreName = CommandLineReader.GetCustomArgument("androidKeyStoreName");
+            string androidKeyAliasName = CommandLineReader.GetCustomArgument("androidKeyAliasName");
+            string androidKeyStorePassword = CommandLineReader.GetCustomArgument("androidKeyStorePassword");
+            string androidKeyAliasPassword = CommandLineReader.GetCustomArgument("androidKeyAliasPassword");
+            string MarketURL_AOS = CommandLineReader.GetCustomArgument("MarketURL_AOS");
 
 
-            // Config.ReadXml();
-            // Config.Version = version;
-            // Config.VersionCode = bundleVersionCode;
-            // Config.MarketURL = "https://naver.com";
-            // if (isTableOnlineMode == "True")
-            //     Config.IsOnlineTableMode = true;
-            // else
-            //     Config.IsOnlineTableMode = false;
-            // Config.WriteXml();
+          
 
-            PlayerSettings.bundleVersion = version;
+            Config.ReadXml();
+
+            if (!string.IsNullOrEmpty(version))
+                Config.Version = version;
+            if (!string.IsNullOrEmpty(bundleVersionCode))
+                Config.VersionCode = bundleVersionCode;
+            if (!string.IsNullOrEmpty(buildPath))
+                Config.BuildPath = buildPath;
+            if(!string.IsNullOrEmpty(useAppBundle))
+            {
+                if (useAppBundle == "True")
+                    Config.useAppBundle = true;
+                else
+                    Config.useAppBundle = false;
+            }
+            if (!string.IsNullOrEmpty(isDebugMode))
+            {
+                if (isDebugMode == "True")
+                    Config.isDebugMode = true;
+                else
+                    Config.isDebugMode = false;
+            }
+            if (!string.IsNullOrEmpty(androidKeyStoreName))
+                Config.androidKeyStoreName = androidKeyStoreName;
+            if (!string.IsNullOrEmpty(androidKeyAliasName))
+                Config.androidKeyAliasName = androidKeyAliasName;
+            if (!string.IsNullOrEmpty(androidKeyStorePassword))
+                Config.androidKeyStorePassword = androidKeyStorePassword;
+            if (!string.IsNullOrEmpty(androidKeyAliasPassword))
+                Config.androidKeyAliasPassword = androidKeyAliasPassword;
+            if (!string.IsNullOrEmpty(MarketURL_AOS))
+                Config.MarketURL_AOS = MarketURL_AOS;
+            
+
+            PlayerSettings.bundleVersion = Config.Version;
             PlayerSettings.productName = APP_NAME;
             PlayerSettings.applicationIdentifier = BUNDLE_ID;
-            PlayerSettings.Android.bundleVersionCode = System.Convert.ToInt32(bundleVersionCode);
-            PlayerSettings.Android.keystoreName = UnityEngine.Application.dataPath + "/cot.keystore";
-            PlayerSettings.Android.keyaliasName = "catWater";
-            PlayerSettings.Android.keystorePass = "carpinus0819";
-            PlayerSettings.Android.keyaliasPass = "carpinus0819";
+            PlayerSettings.Android.bundleVersionCode = System.Convert.ToInt32(Config.VersionCode);
+            PlayerSettings.Android.keystoreName = Config.androidKeyStoreName;
+            PlayerSettings.Android.keyaliasName = Config.androidKeyAliasName;
+            PlayerSettings.Android.keystorePass = Config.androidKeyStorePassword;
+            PlayerSettings.Android.keyaliasPass = Config.androidKeyAliasPassword;
 
-            if (isDebugMode == "True")
+            if (Config.isDebugMode == true)
             {
                 EditorUserBuildSettings.development = true;
                 EditorUserBuildSettings.allowDebugging = true;
@@ -101,12 +132,12 @@ namespace ControlRoom
                 EditorUserBuildSettings.allowDebugging = false;
             }
 
-            if (!System.IO.Directory.Exists(buildPath))
+            if (!System.IO.Directory.Exists(Config.BuildPath))
             {
                 try
                 {
-                    System.IO.Directory.CreateDirectory(buildPath);
-                    UnityEngine.Debug.Log("Create Build Path: " + buildPath);
+                    System.IO.Directory.CreateDirectory(Config.BuildPath);
+                    UnityEngine.Debug.Log("Create Build Path: " + Config.BuildPath);
                 }
                 catch (Exception e)
                 {
@@ -115,26 +146,26 @@ namespace ControlRoom
                 }
             }
 
-            buildPath = buildPath + APP_NAME + "_" + version;
+            Config.BuildPath = buildPath + APP_NAME + "_" + version;
 
-            if (useAppBundle == "True")
+            if (Config.useAppBundle ==true)
             {
-                buildPath += ".aab";
+                Config.BuildPath += ".aab";
                 EditorUserBuildSettings.buildAppBundle = true;
             }
             else
             {
-                buildPath += ".apk";
+                Config.BuildPath += ".apk";
                 EditorUserBuildSettings.buildAppBundle = false;
             }
 
 
             AssetDatabase.Refresh();
 
-            GenericBuild(SCENES, buildPath, BuildTarget.Android, BuildOptions.None);
+            GenericBuild(SCENES, Config.BuildPath, BuildTarget.Android, BuildOptions.None);
         }
 
-        static void Build_IOS()
+        public static void Build_IOS()
         {
             Debug.Log($"AUTOBUILDER: Build {APP_NAME} iOS");
             if (EditorUserBuildSettings.activeBuildTarget != BuildTarget.iOS)
@@ -142,32 +173,62 @@ namespace ControlRoom
                 throw new Exception("Invalid Platform");
             }
 
-            string buildPath = CommandLineReader.GetCustomArgument("BuildPath");
             string version = CommandLineReader.GetCustomArgument("Version");
             string bundleVersionCode = CommandLineReader.GetCustomArgument("VersionCode");
+            string buildPath = CommandLineReader.GetCustomArgument("BuildPath");
             string isDebugMode = CommandLineReader.GetCustomArgument("IsDebugMode");
-            string isTableOnlineMode = CommandLineReader.GetCustomArgument("isTableOnlineMode");
+            string MarketURL_iOS = CommandLineReader.GetCustomArgument("MarketURL_iOS");
+            string isIOSSimulatorBuild= CommandLineReader.GetCustomArgument("isIOSSimulatorBuild");
+            string iOSMinimalOSVersion = CommandLineReader.GetCustomArgument("iOSMinimalOSVersion");
+
+            Config.ReadXml();
+
+            if (!string.IsNullOrEmpty(version))
+                Config.Version = version;
+            if (!string.IsNullOrEmpty(bundleVersionCode))
+                Config.VersionCode = bundleVersionCode;
+            if (!string.IsNullOrEmpty(buildPath))
+                Config.BuildPath = buildPath;
+            
+            if (!string.IsNullOrEmpty(isDebugMode))
+            {
+                if (isDebugMode == "True")
+                    Config.isDebugMode = true;
+                else
+                    Config.isDebugMode = false;
+            }
+            if (!string.IsNullOrEmpty(isIOSSimulatorBuild))
+            {
+                if (isDebugMode == "True")
+                    Config.isIOSSimulatorBuild = true;
+                else
+                    Config.isIOSSimulatorBuild = false;
+            }
+
+            if (!string.IsNullOrEmpty(MarketURL_iOS))
+                Config.MarketURL_AOS = MarketURL_iOS;
+            if (!string.IsNullOrEmpty(iOSMinimalOSVersion))
+                Config.iOSMinimalOSVersionString = iOSMinimalOSVersion;
 
 
-            // Config.ReadXml();
-            // Config.Version = version;
-            // Config.VersionCode = bundleVersionCode;
-            // Config.MarketURL = "https://naver.com";
-            // if (isTableOnlineMode == "True")
-            //     Config.IsOnlineTableMode = true;
-            // else
-            //     Config.IsOnlineTableMode = false;
 
-            // Config.WriteXml();
-
-            PlayerSettings.bundleVersion = version;
+            PlayerSettings.bundleVersion = Config.Version;
             PlayerSettings.productName = APP_NAME;
             PlayerSettings.applicationIdentifier = BUNDLE_ID;
-            PlayerSettings.iOS.buildNumber = bundleVersionCode;
-            PlayerSettings.iOS.targetOSVersionString = "10.0";
+            PlayerSettings.iOS.buildNumber = Config.VersionCode;
+            PlayerSettings.iOS.targetOSVersionString = Config.iOSMinimalOSVersionString;
+
+            if (Config.isIOSSimulatorBuild==true)
+            {
+                PlayerSettings.iOS.sdkVersion = iOSSdkVersion.SimulatorSDK;
+            }
+            else
+            {
+                PlayerSettings.iOS.sdkVersion = iOSSdkVersion.DeviceSDK;
+            }
 
 
-            if (isDebugMode == "True")
+            if (Config.isDebugMode == true)
             {
                 EditorUserBuildSettings.development = true;
                 EditorUserBuildSettings.allowDebugging = true;
@@ -178,12 +239,12 @@ namespace ControlRoom
                 EditorUserBuildSettings.allowDebugging = false;
             }
 
-            if (!System.IO.Directory.Exists(buildPath))
+            if (!System.IO.Directory.Exists(Config.BuildPath))
             {
                 try
                 {
-                    System.IO.Directory.CreateDirectory(buildPath);
-                    UnityEngine.Debug.Log("Create Build Path: " + buildPath);
+                    System.IO.Directory.CreateDirectory(Config.BuildPath);
+                    UnityEngine.Debug.Log("Create Build Path: " + Config.BuildPath);
                 }
                 catch (Exception e)
                 {
@@ -192,11 +253,11 @@ namespace ControlRoom
                 }
             }
 
-            buildPath = buildPath + APP_NAME + "_" + version;
+            Config.BuildPath = buildPath + APP_NAME + "_" + version;
 
             AssetDatabase.Refresh();
 
-            GenericBuild(SCENES, buildPath, BuildTarget.iOS, BuildOptions.None);
+            GenericBuild(SCENES, Config.BuildPath, BuildTarget.iOS, BuildOptions.None);
         }
 
 
