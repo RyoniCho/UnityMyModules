@@ -12,6 +12,12 @@ namespace ControlRoom
         SceneTransitionDestination.DestinationTag m_ZoneRestartDestinationTag;
         bool m_Transitioning = false;
 
+        public delegate void ProcessBeforeUnloadingCurrentScene();
+        public delegate void ProcessAfterLoadingNextScene();
+        public ProcessBeforeUnloadingCurrentScene processBeforeUnloadingCurrentScene;
+        public ProcessAfterLoadingNextScene processAfterLoadingNextScene;
+
+
         protected override void Awake()
         {
             base.Awake();
@@ -38,39 +44,21 @@ namespace ControlRoom
         {
             m_Transitioning = true;
 
-            //Save Current Data
-            //PersistentDataManager.SaveAllData();
-
-            //if (transitionType != TransitionPoint.TransitionType.LoadSceneFromFile)
-            //    DataManager.Instance.SaveAllData();
-
-            //Input Disable
-            //if (m_PlayerInput == null)
-            //    m_PlayerInput = FindObjectOfType<PlayerInput>();
-            //if (m_PlayerInput) m_PlayerInput.ReleaseControl();
+            //Process Before Unload Current Scene :Save Current Data/Input Disable, etc
+            processBeforeUnloadingCurrentScene();
 
             //Scene Fade Out
             yield return StartCoroutine(ScreenFader.FadeSceneOut(ScreenFader.FadeType.Loading));
 
-            //PersistentDataManager.ClearPersisters();
+         
+            System.GC.Collect();
 
-            //DataManager.Instance.ClearRegisers();
-            //GameManager.Instance.BeforeSceneTransition();
-
-            //System.GC.Collect();
             //SceneLoad
             yield return SceneManager.LoadSceneAsync(newSceneName);
 
-            //Input Enable
-            //m_PlayerInput = FindObjectOfType<PlayerInput>();
-            //if (m_PlayerInput) m_PlayerInput.ReleaseControl();
 
-            //Load Current Data
-            //PersistentDataManager.LoadAllData();
-
-            //DataManager.Instance.LoadAllData();
-            //GameManager.Instance.PostInGameSceneTransition();
-
+            //Process After Loading Next Scene : Load Current Data/Input Enable, etc
+            processAfterLoadingNextScene();
 
             SceneTransitionDestination entrance = GetDestination(destinationTag);
 
@@ -89,9 +77,7 @@ namespace ControlRoom
             if (entrance != null)
                 entrance.OnReachDestination.Invoke();
             yield return StartCoroutine(ScreenFader.FadeSceneIn());
-
-
-            //m_PlayerInput.GainControl();
+          
 
             m_Transitioning = false;
         }
