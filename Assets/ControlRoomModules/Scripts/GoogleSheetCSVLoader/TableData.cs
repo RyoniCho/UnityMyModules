@@ -4,13 +4,7 @@ using UnityEngine;
 using System;
 namespace ControlRoom
 {
-    public interface ITableDataManager
-    {
-        public void LoadData();
-        public void LoadBinaryData();
-        public void BuildBinaryData();
 
-    }
     public class TableData 
     {
        

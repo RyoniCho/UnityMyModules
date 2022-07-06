@@ -11,14 +11,21 @@ namespace ControlRoom
         [MenuItem("ControlRoom/Build/BuildTableCSV")]
         static void SaveCSVTableDataAtLocal()
         {
-            TableDataBuilder.BuildTableDataFromCSV();
+            if (EditorUtility.DisplayDialog("Table Build", "CSV로 테이블 빌드하시겠습니까?", "확인", "취소"))
+            {
+                TableDataBuilder.BuildTableDataFromCSV();
+            }
+           
         }
         [MenuItem("ControlRoom/Build/BuildTableDataBinary")]
         static void BuildTableData_Binary()
         {
 
-           
-            TableDataBuilder.BuildTableDataFromBinary();
+            if (EditorUtility.DisplayDialog("Table Build", "Binary로 테이블 빌드하시겠습니까?", "확인", "취소"))
+            {
+                TableDataBuilder.BuildTableDataFromBinary();
+            }
+            
         }
 #endif
 

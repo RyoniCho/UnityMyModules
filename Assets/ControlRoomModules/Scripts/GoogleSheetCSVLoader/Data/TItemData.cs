@@ -38,76 +38,23 @@ public class ItemData
 }
 
 
-public class ItemDataManager:SingletonBase<ItemDataManager>,ITableDataManager
+public class ItemDataManager: TableBaseDataManager
 {
     Dictionary<int, ItemData> dicItemData = new Dictionary<int, ItemData>();
+    protected override TableManager.GoogleDocsID currentTableId => TableManager.GoogleDocsID.ITEM;
+    
 
-    protected override void Awake()
+    protected override void AfterLoadComplete() {}
+       
+
+    protected override void SetTableData(DataForm data)
     {
-        base.Awake();
-        DontDestroyOnLoad(this.gameObject);
+        ItemData itemData = new ItemData((TItemData)data);
+        dicItemData.Add(itemData.itemIndex, itemData);
     }
 
-    public void LoadData()
-    {
-        TableDataLoader.LoadData((int)TableManager.GoogleDocsID.ITEM, (TableData data) =>
-        {
-            ConvertTableData(data);
-            TableManager.Instance.LoadCompleteTableData(TableManager.GoogleDocsID.ITEM);
-        });
-    }
+ 
 
-    public void LoadBinaryData()
-    {
-        TableDataLoader.LoadData((int)TableManager.GoogleDocsID.ITEM, (System.IO.BinaryReader reader) =>
-        {
-            ConverBinaryData(reader);
-            TableManager.Instance.LoadCompleteTableData(TableManager.GoogleDocsID.ITEM);
-        });
-    }
-
-    void ConvertTableData(TableData data)
-    {
-        foreach (var tableData in data.dicTableData)
-        {
-            TItemData tItemdata = new TItemData();
-
-            tItemdata.SetDataValues(tableData.Value);
-            SetItemData(tItemdata.itemIndex.Value, new ItemData(tItemdata));
-        }
-
-    }
-
-    void ConverBinaryData(System.IO.BinaryReader reader)
-    {
-        TItemData tItemData = new TItemData();
-        tItemData.ReadBinary(reader);
-
-        SetItemData(tItemData.itemIndex.Value, new ItemData(tItemData));
-
-    }
-
-    void ConvertAndWriteBinaryData(TableData data, System.IO.BinaryWriter writer)
-    {
-        foreach (var tableData in data.dicTableData)
-        {
-            TItemData tItemdata = new TItemData();
-
-            tItemdata.SetDataValues(tableData.Value);
-
-            tItemdata.WriteBinary(writer);
-        }
-    }
-
-    void SetItemData(int itemId, ItemData itemdata)
-    {
-        dicItemData[itemId] = itemdata;
-    }
-
-    public void BuildBinaryData()
-    {
-        TableDataBuilder.DownloadCSVAndCreateBinaryFile((int)TableManager.GoogleDocsID.ITEM, ConvertAndWriteBinaryData);
-    }
-
+    
 
 }

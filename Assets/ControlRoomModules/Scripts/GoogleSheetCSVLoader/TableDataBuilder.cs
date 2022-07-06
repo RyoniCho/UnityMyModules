@@ -1,19 +1,21 @@
-
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System.Linq;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace ControlRoom
 {
     public static class TableDataBuilder 
     { 
         public delegate void BinaryBuildCallback(TableData tData, System.IO.BinaryWriter writer);
-
-        private static void DownloadCSVAndCreateFile(int docsId)
+        private static int buildCount = 0;
+        private static Stopwatch stopwatch = new Stopwatch();
+        private static async Task DownloadCSVAndCreateFile(int docsId)
         {
-            TableDataLoader.DownloadGoogleDocs(docsId,(string csvText) =>
+            await TableDataLoader.DownloadGoogleDocs(docsId,(string csvText) =>
             {
 
                 //Table Directory Check
@@ -26,13 +28,16 @@ namespace ControlRoom
 
                 System.IO.File.WriteAllText(path, csvText);
 
-                Debug.Log("Table Save:" + path);
+                UnityEngine.Debug.Log("Table Save:" + path);
+                buildCount += 1;
+
+
             });
         }
 
-        public static void DownloadCSVAndCreateBinaryFile(int docsId, BinaryBuildCallback callBack)
+        public static async Task DownloadCSVAndCreateBinaryFile(int docsId, BinaryBuildCallback callBack)
         {
-            TableDataLoader.DownloadGoogleDocs(docsId, (string csvText) =>
+            await TableDataLoader.DownloadGoogleDocs(docsId, (string csvText) =>
             {
                 //Table Directory Check
                 if (!System.IO.Directory.Exists(Application.dataPath + "/Resources/Table"))
@@ -50,24 +55,60 @@ namespace ControlRoom
                         data.LoadRawCSVText(csvText);
 
                         callBack(data, writer);
-
+                        buildCount += 1;
+                        UnityEngine.Debug.Log("Table Save:" + path);
                     }
                 }
             });
         }
 
-        public static void BuildTableDataFromCSV()
+        public static async void BuildTableDataFromCSV()
         {
+            UnityEngine.Debug.Log("CSV TABLE Build START");
+            stopwatch.Start();
+            EditorUtility.DisplayProgressBar("테이블 빌드 (To CSV)", "테이블 빌드중입니다.", 0f);
+            var maxCount = System.Enum.GetValues(typeof(TableManager.GoogleDocsID)).Length- 1;
+            buildCount = 0;
+
+
             foreach (TableManager.GoogleDocsID id in System.Enum.GetValues(typeof(TableManager.GoogleDocsID)))
             {
-                DownloadCSVAndCreateFile((int)id);
+             
+                if (id != TableManager.GoogleDocsID.NONE)
+                {
+                    await DownloadCSVAndCreateFile((int)id);
+                    EditorUtility.DisplayProgressBar("테이블 빌드 (To CSV)", "테이블 빌드중입니다.", (float)buildCount/maxCount);
+                }
+                    
             }
+            
+            UnityEngine.Debug.Log("CSV TABLE Build END");
+            stopwatch.Stop();
+
+            EditorUtility.ClearProgressBar();
+
+            UnityEngine.Debug.Log($"CSV Table Build ElapsTime:{stopwatch.ElapsedMilliseconds}");
         }
 
-        public static void BuildTableDataFromBinary()
+        public static async void BuildTableDataFromBinary()
         {
-            TableManager.Instance.BuildBinaryDataAll();
-            
+            UnityEngine.Debug.Log("Binary Table Build START");
+            stopwatch.Start();
+
+            EditorUtility.DisplayProgressBar("테이블 빌드 (To Binary)", "테이블 빌드중입니다.", 0f);
+            var maxCount = System.Enum.GetValues(typeof(TableManager.GoogleDocsID)).Length - 1;
+            buildCount = 0;
+                     
+            await TableManager.Instance.BuildBinaryDataAll(()=> 
+            {
+                EditorUtility.DisplayProgressBar("테이블 빌드 (To Binary)", "테이블 빌드중입니다.", (float)buildCount / maxCount);
+            });
+           
+            UnityEngine.Debug.Log("Binary Table Build END");
+            stopwatch.Stop();
+            EditorUtility.ClearProgressBar();
+
+            UnityEngine.Debug.Log($"Binary Table Build ElapsTime:{stopwatch.ElapsedMilliseconds}");
         }
 
       

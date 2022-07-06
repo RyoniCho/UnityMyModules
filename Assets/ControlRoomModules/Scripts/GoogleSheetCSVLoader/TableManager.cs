@@ -1,7 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Diagnostics;
+using System.Collections;
+using System.Threading.Tasks;
 
 namespace ControlRoom
 {
@@ -24,10 +25,10 @@ namespace ControlRoom
         /// </summary>
 
 
-        public const string docsKey = "==Google Docs Key Here==";
+        public const string docsKey = "1j_1b-SU5f_llS-yaANJk-hR2kH8T0le6DdkqpfRNoRg";
         public enum GoogleDocsID
         {
-
+            NONE=-1,
             LOCALIZATION = 1724096133,
             ITEM = 0,
 
@@ -36,20 +37,31 @@ namespace ControlRoom
         /// <summary>
         /// Table Data manager (Singleton Design) Registration.
         /// </summary>
-        public List<ITableDataManager> listTableDataManager = new List<ITableDataManager>();
+        public LocalizationDataManager localization;
+        public ItemDataManager item;
+        
+        public List<TableBaseDataManager> listTableDataManager = new List<TableBaseDataManager>();
+       
         private bool isSetTableDataManager = false;
+        private bool isTableLoading = false;
+        public bool IsTableLoading => isTableLoading;
 
         public void SetTableDataManager()
         {
             if (isSetTableDataManager)
                 return;
 
-            listTableDataManager.Add(LocalizationDataManager.Instance);
+            localization = new LocalizationDataManager();
+            item = new ItemDataManager();
+
+            listTableDataManager.Clear();
+
+            listTableDataManager.Add(localization);
+            listTableDataManager.Add(item);
 
             isSetTableDataManager = true;
 
         }
-
 
 
         private HashSet<GoogleDocsID> hsTotalTable = new HashSet<GoogleDocsID>();
@@ -70,6 +82,7 @@ namespace ControlRoom
 
 			DontDestroyOnLoad(this.gameObject);
 
+            RegisterTableDataForLoad();
             SetTableDataManager();
 
             stopwatch = new Stopwatch();
@@ -78,63 +91,45 @@ namespace ControlRoom
 
         public void LoadTableCSV()
         {
-            StartCoroutine(LoadAllTable());
+            LoadAllTable();
         }
 
         public void LoadTableBinary()
         {
-            StartCoroutine(LoadAllTable(true));
+            LoadAllTable(true);
         }
 
+        async void LoadAllTable(bool binaryLoad = false)
+        {
+            isTableLoading = true;
 
-       IEnumerator LoadAllTable(bool binaryLoad=false)
-       {
             stopwatch.Start();
-            RegisterTableDataForLoad();
 
-            if(binaryLoad)
+            if (binaryLoad)
             {
 
-                foreach(var manager in listTableDataManager)
+                foreach (var manager in listTableDataManager)
                 {
-                    manager.LoadBinaryData();
+                    await manager.LoadBinaryData();
                 }
-               
+
             }
             else
             {
-                foreach(var manager in listTableDataManager)
+                foreach (var manager in listTableDataManager)
                 {
-                    manager.LoadData();
-                }
-               
-             
-            }
-            
-
-            while (true)
-            {
-                if (LoadComplete)
-                {
-                   
-                    stopwatch.Stop();
-                    UnityEngine.Debug.Log($"Table Load ElapsTime:{stopwatch.ElapsedMilliseconds} / BinaryLoad: {binaryLoad}");
-                   
-                    yield break;
+                    await manager.LoadData();
                 }
 
-                yield return null;
+
             }
 
-         
-       }
+            stopwatch.Stop();
 
-        public bool LoadComplete
-        {
-            get
-            {
-                return (TableLoadProgressValue >= 1f);
-            }
+            isTableLoading = false;
+
+            UnityEngine.Debug.Log($"Table Load ElapsTime:{stopwatch.ElapsedMilliseconds} / BinaryLoad: {binaryLoad}");
+
         }
 
         public float TableLoadProgressValue
@@ -150,11 +145,12 @@ namespace ControlRoom
         }
 
 
-        public void RegisterTableDataForLoad()
+        private void RegisterTableDataForLoad()
         {
-            foreach (GoogleDocsID id in System.Enum.GetValues(typeof(GoogleDocsID)))
+           foreach (GoogleDocsID id in System.Enum.GetValues(typeof(GoogleDocsID)))
             {
-                hsTotalTable.Add(id);
+                if(id != GoogleDocsID.NONE)
+                    hsTotalTable.Add(id);
             }
 
         }
@@ -164,29 +160,18 @@ namespace ControlRoom
             hsLoadCompleteTable.Add(id);
         }
 
-        public void BuildBinaryDataAll()
+        public async Task BuildBinaryDataAll(System.Action onCompleteTablebuild)
         {
             SetTableDataManager();
-
-            if (stopwatch == null)
-                stopwatch = new Stopwatch();
-
-
-            UnityEngine.Debug.Log("Build Binary Data Start");
-
-            stopwatch.Start();
             
             for (int i= 0; i< listTableDataManager.Count;i++)
             {
               
-                listTableDataManager[i].BuildBinaryData();
-               
+                await listTableDataManager[i].BuildBinaryData();
+                onCompleteTablebuild();
+
+
             }
-
-            stopwatch.Stop();
-           
-            UnityEngine.Debug.Log($"Build Binary Data End : {stopwatch.ElapsedMilliseconds}");
-
 
         }
 

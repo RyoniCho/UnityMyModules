@@ -3,32 +3,17 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using System.Threading.Tasks;
 
 namespace ControlRoom
 {
-    public class TableDataLoader : MonoBehaviour
+    public class TableDataLoader 
     {
         public const string baseUrl = "https://docs.google.com/spreadsheet/pub?key={0}&single=true&output=csv&gid={1}";
         public static bool OnlineMode = true;
 
-        private TableData data;
-        private static TableDataLoader loader;
-        public static TableDataLoader Loader
-        {
-            get
-            {
-                if(loader == null)
-                {
-                    GameObject obj = TableManager.Instance.gameObject;
-                    loader = obj.GetComponent<TableDataLoader>();
-
-                    if (loader == null)
-                        loader = obj.AddComponent<TableDataLoader>();
-                  
-                }
-                return loader;
-            }
-        }
+        private static TableData data;
+       
             
     
         public delegate void CallBack(TableData tData);
@@ -36,56 +21,58 @@ namespace ControlRoom
         public delegate void BinaryLoadCallback(System.IO.BinaryReader reader);
 
         
-        private static void LoadOnlineTableDataFromGoogleSheet(int docsId, CallBack callBack)
+        private static async Task LoadOnlineTableDataFromGoogleSheet(int docsId, CallBack callBack)
         {
-            Loader.LoadOnlineCSVData(docsId, callBack);
+            await LoadOnlineCSVData(docsId, callBack);
         }
 
         private static void LoadTableDataFromCSVFile(int docsId, CallBack callBack)
         {
-            Loader.LoadCSVFile(docsId, callBack);
+            LoadCSVFile(docsId, callBack);
         }
 
-        private static void LoadTableDataFromBinaryFile(int docsId, BinaryLoadCallback callback)
+        private static async Task LoadTableDataFromBinaryFile(int docsId, BinaryLoadCallback callback)
         {
-            Loader.LoadBinaryFile(docsId, callback);
+            await LoadBinaryFile(docsId, callback);
         }
 
-        public static void DownloadGoogleDocs(int docsId, GoogleSheetDownloadCallback callback)
+        public static async Task DownloadGoogleDocs(int docsId, GoogleSheetDownloadCallback callback)
         {
-            Loader.DownloadOnlineCSV(docsId, callback);
+            await DownloadOnlineCSV(docsId, callback);
         }
 
-        public static void LoadData(int docsId,CallBack callback)
+        public static async Task LoadData(int docsId,CallBack callback)
         {
             if (OnlineMode)
-                LoadOnlineTableDataFromGoogleSheet(docsId, callback);
+                await LoadOnlineTableDataFromGoogleSheet(docsId, callback);
             else
                 LoadTableDataFromCSVFile(docsId, callback);
         }
 
-        public static void LoadData(int docsId, BinaryLoadCallback callback)
+        public static async Task LoadData(int docsId, BinaryLoadCallback callback)
         {
-            LoadTableDataFromBinaryFile(docsId, callback);
+            await LoadTableDataFromBinaryFile(docsId, callback);
         }
 
-        void DownloadOnlineCSV(int docsId, GoogleSheetDownloadCallback callback)
+        static async Task DownloadOnlineCSV(int docsId, GoogleSheetDownloadCallback callback)
         {
-            StartCoroutine(RequestToDownloadGoogleDocs(docsId, callback));
+            //StartCoroutine(RequestToDownloadGoogleDocs(docsId, callback));
+            await RequestToDownloadGoogleDocs(docsId, callback); 
+            
         }
 
-        void LoadOnlineCSVData(int docsId, CallBack callback)
+        static async Task LoadOnlineCSVData(int docsId, CallBack callback)
         {
-            StartCoroutine(RequestToDownloadGoogleDocs(docsId, (string downloadedText) =>
+            await RequestToDownloadGoogleDocs(docsId, (string downloadedText) =>
             {
                 data = new TableData();
                 data.LoadRawCSVText(downloadedText);
                 callback(data);
 
-            }));
+            });
         }
 
-        void LoadCSVFile(int docsId,CallBack callback)
+        static void LoadCSVFile(int docsId,CallBack callback)
         {
             var text = Resources.Load<TextAsset>(string.Format("Table/{0}", ((TableManager.GoogleDocsID)docsId).ToString().ToLower()));
             if (text != null)
@@ -101,53 +88,78 @@ namespace ControlRoom
             }
         }
 
-        void LoadBinaryFile(int docsId, BinaryLoadCallback callback)
+        static async Task LoadBinaryFile(int docsId, BinaryLoadCallback callback)
         {
-            var binPath = $"{Application.dataPath}/Resources/Table/{((TableManager.GoogleDocsID)docsId).ToString().ToLower()}.bin";
-            try
+            await Task.Run(() =>
             {
-                var bytes = System.IO.File.ReadAllBytes(binPath);
-                using (var memoryStream = new System.IO.MemoryStream(bytes))
+                var binPath = $"{Application.dataPath}/Resources/Table/{((TableManager.GoogleDocsID)docsId).ToString().ToLower()}.bin";
+                try
                 {
-                    using (var reader = new System.IO.BinaryReader(memoryStream))
+                    var bytes = System.IO.File.ReadAllBytes(binPath);
+                    using (var memoryStream = new System.IO.MemoryStream(bytes))
                     {
-                        while (memoryStream.Position < memoryStream.Length)
+                        using (var reader = new System.IO.BinaryReader(memoryStream))
                         {
-                            callback(reader);
+                            while (memoryStream.Position < memoryStream.Length)
+                            {
+                                callback(reader);
+                            }
                         }
                     }
                 }
-            }
-            catch
-            {
-                Debug.LogError(string.Format("{0} - local Binary data could not loaded", docsId));
-            }
+                catch
+                {
+                    Debug.LogError(string.Format("{0} - local Binary data could not loaded", docsId));
+                }
+            });
+            
            
         }
 
 
-        IEnumerator RequestToDownloadGoogleDocs(int docsId, GoogleSheetDownloadCallback callBack)
-        {
-            string docsKey=TableManager.docsKey;
+        //IEnumerator RequestToDownloadGoogleDocs(int docsId, GoogleSheetDownloadCallback callBack)
+        //{
+        //    string docsKey=TableManager.docsKey;
 
-            string url = string.Format(baseUrl, docsKey, docsId);
-            UnityWebRequest request = UnityWebRequest.Get(url);
+        //    string url = string.Format(baseUrl, docsKey, docsId);
+        //    UnityWebRequest request = UnityWebRequest.Get(url);
           
 
-            yield return request.SendWebRequest();
+        //    yield return request.SendWebRequest();
 
-            if(request.result==UnityWebRequest.Result.ConnectionError||request.result==UnityWebRequest.Result.ProtocolError)
-            {
-                Debug.LogError("Network Error");
-            }
-            else
-            {
-                callBack(request.downloadHandler.text);
+        //    if(request.result==UnityWebRequest.Result.ConnectionError||request.result==UnityWebRequest.Result.ProtocolError)
+        //    {
+        //        Debug.LogError("Network Error");
+        //    }
+        //    else
+        //    {
+        //        callBack(request.downloadHandler.text);
                 
+        //    }
+
+        //}
+
+         static async Task RequestToDownloadGoogleDocs(int docsId, GoogleSheetDownloadCallback callBack)
+         {
+            string docsKey = TableManager.docsKey;
+
+            string url = string.Format(baseUrl, docsKey, docsId);
+          
+            var request = System.Net.WebRequest.Create(url);
+
+
+            var response = await request.GetResponseAsync();
+
+            using (System.IO.Stream stream = response.GetResponseStream())
+            {
+                System.IO.StreamReader reader = new System.IO.StreamReader(stream, System.Text.Encoding.UTF8);
+                string responseString = reader.ReadToEnd();
+                callBack(responseString);
             }
+
+            response.Close();
 
         }
-
 
     }
     
