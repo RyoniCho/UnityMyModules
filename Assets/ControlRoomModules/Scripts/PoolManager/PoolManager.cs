@@ -78,7 +78,59 @@ namespace ControlRoom
 			}
 		}
 
-		public GameObject SpawnObject(string poolName)
+        public T GetPreSpawnObject<T>(string poolName)
+        {
+            Pool pool;
+            if (dicTotalPools.TryGetValue(poolName, out pool))
+            {
+                return pool.GetPreSpawnObject<T>(this.transform);
+
+            }
+            else
+            {
+                Debug.LogError("Error: " + poolName + "is not contain pools");
+                return default(T);
+            }
+
+
+        }
+
+        public T GetPreSpawnObject<T>(string poolName, Transform spawnTransformInfo)
+        {
+            Pool pool;
+            if (dicTotalPools.TryGetValue(poolName, out pool))
+            {
+                return pool.GetPreSpawnObject<T>(this.transform, spawnTransformInfo: spawnTransformInfo);
+
+            }
+            else
+            {
+                Debug.LogError("Error: " + poolName + "is not contain pools");
+                return default(T);
+            }
+
+
+        }
+
+        public T GetPreSpawnObject<T>(string poolName, Vector3 spawnPosition, Quaternion spawnRotation)
+        {
+            Pool pool;
+            if (dicTotalPools.TryGetValue(poolName, out pool))
+            {
+                return pool.GetPreSpawnObject<T>(this.transform, spawnPosition: spawnPosition, spawnRotation: spawnRotation);
+
+            }
+            else
+            {
+                Debug.LogError("Error: " + poolName + "is not contain pools");
+                return default(T);
+            }
+
+
+        }
+
+
+        public GameObject SpawnObject(string poolName)
 		{
 
 			Pool pool;

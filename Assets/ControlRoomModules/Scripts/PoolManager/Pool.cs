@@ -34,8 +34,16 @@ public class Pool
             listPool.Add (obj.gameObject);
         }
     }
+    public T GetPreSpawnObject<T>(Transform parent, Vector3 spawnPosition = default(Vector3), Quaternion spawnRotation = default(Quaternion), Transform spawnTransformInfo = null)
+    {
+        var gameObject = this.SpawnObject(parent, spawnPosition: spawnPosition, spawnRotation: spawnRotation, spawnTransformInfo: spawnTransformInfo, preSpawn: true);
 
-    public GameObject SpawnObject(Transform parent,Vector3 spawnPosition=default(Vector3),Quaternion spawnRotation=default(Quaternion),Transform spawnTransformInfo=null)
+        T component = gameObject.GetComponent<T>();
+
+        return component;
+    }
+
+    public GameObject SpawnObject(Transform parent,Vector3 spawnPosition=default(Vector3),Quaternion spawnRotation=default(Quaternion),Transform spawnTransformInfo=null, bool preSpawn = false)
     {
         //현재 풀링인덱스 저장 
         int saveIndex = currentPoolIndex;
@@ -71,7 +79,9 @@ public class Pool
             obj.transform.position = spawnPosition;
             obj.transform.rotation =  spawnRotation;
         }
-        obj.SetActive (true);
+
+        if (preSpawn == false)
+            obj.SetActive(true);
 
         dicSpawnedList.Add (obj.GetHashCode (), currentPoolIndex);
 
