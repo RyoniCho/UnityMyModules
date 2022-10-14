@@ -45,7 +45,7 @@ namespace ControlRoom
             m_Transitioning = true;
 
             //Process Before Unload Current Scene :Save Current Data/Input Disable, etc
-            processBeforeUnloadingCurrentScene();
+            processBeforeUnloadingCurrentScene?.Invoke();
 
             //Scene Fade Out
             yield return StartCoroutine(ScreenFader.FadeSceneOut(ScreenFader.FadeType.Loading));
@@ -58,7 +58,7 @@ namespace ControlRoom
 
 
             //Process After Loading Next Scene : Load Current Data/Input Enable, etc
-            processAfterLoadingNextScene();
+            processAfterLoadingNextScene?.Invoke();
 
             SceneTransitionDestination entrance = GetDestination(destinationTag);
 
@@ -75,7 +75,7 @@ namespace ControlRoom
             SetupNewScene(transitionType, entrance);
 
             if (entrance != null)
-                entrance.OnReachDestination.Invoke();
+                entrance.OnReachDestination?.Invoke();
             yield return StartCoroutine(ScreenFader.FadeSceneIn());
           
 
@@ -129,13 +129,15 @@ namespace ControlRoom
             enteringTransform.rotation = entranceLocation.rotation;
         }
 
-        public string CurrentSceneName
+        public string CurrentEntranceSceneName
         {
             get
             {
                 return m_CurrentScene.name;
             }
         }
+
+        public string CurrentActiveSceneName => SceneManager.GetActiveScene().name;
 
     }
 }
