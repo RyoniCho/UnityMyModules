@@ -9,7 +9,7 @@ namespace ControlRoom
     public class TableManager : SingletonBase<TableManager>
     {
 
-
+        [Header("Load Online GoogleSheet(CSV Only.Binary Load not supported)")]
         public bool IsOnlineLiveLoadMode = true;
 
 
@@ -43,8 +43,8 @@ namespace ControlRoom
         public List<TableBaseDataManager> listTableDataManager = new List<TableBaseDataManager>();
        
         private bool isSetTableDataManager = false;
-        private bool isTableLoading = false;
-        public bool IsTableLoading => isTableLoading;
+        private bool isTableLoadComplete = false;
+        public bool IsTableLoadComplete => isTableLoadComplete;
 
         public void SetTableDataManager()
         {
@@ -85,6 +85,14 @@ namespace ControlRoom
             RegisterTableDataForLoad();
             SetTableDataManager();
 
+#if UNITY_EDITOR
+            TableDataLoader.DataPath = UnityEngine.Application.dataPath;
+
+#else
+            TableDataLoader.DataPath = UnityEngine.Application.streamingAssetsPath;
+#endif
+            TableDataLoader.OnlineMode = IsOnlineLiveLoadMode;
+
             stopwatch = new Stopwatch();
 
        }
@@ -101,7 +109,7 @@ namespace ControlRoom
 
         async void LoadAllTable(bool binaryLoad = false)
         {
-            isTableLoading = true;
+            isTableLoadComplete = false;
 
             stopwatch.Start();
 
@@ -126,7 +134,7 @@ namespace ControlRoom
 
             stopwatch.Stop();
 
-            isTableLoading = false;
+            isTableLoadComplete = true;
 
             UnityEngine.Debug.Log($"Table Load ElapsTime:{stopwatch.ElapsedMilliseconds} / BinaryLoad: {binaryLoad}");
 
@@ -140,7 +148,7 @@ namespace ControlRoom
                     return 0f;
 
 
-                return ((float)hsLoadCompleteTable.Count / (float)hsTotalTable.Count);
+                return ((float)hsLoadCompleteTable.Count / (float)hsTotalTable.Count)*100;
             }
         }
 

@@ -253,8 +253,10 @@ namespace ControlRoom
                 }
             }
 
-            Config.BuildPath = buildPath + APP_NAME + "_" + version;
-
+            Config.BuildPath = System.IO.Path.Join(buildPath,APP_NAME + "_" + version);
+#if TABLE_DATA_BUILDER
+            //BuildAndMoveTableData();
+#endif
             AssetDatabase.Refresh();
 
             GenericBuild(SCENES, Config.BuildPath, BuildTarget.iOS, BuildOptions.None);
@@ -270,6 +272,37 @@ namespace ControlRoom
             //throw new Exception(res.summary.result.ToString());
 
         }
+#if TABLE_DATA_BUILDER
+        public static async void BuildAndMoveTableData()
+        {
+            UnityEngine.Debug.Log("Start Table Build -Binary ");
+
+            await TableDataBuilder.BuildTableDataFromBinary();
+
+            UnityEngine.Debug.Log("Table Build End");
+
+            var sourPath = $"{UnityEngine.Application.dataPath }/Resources/Table/";
+            var destPath = $"{UnityEngine.Application.streamingAssetsPath}/Table/";
+            if (!System.IO.Directory.Exists(destPath))
+            {
+                System.IO.Directory.CreateDirectory(destPath);
+            }
+
+
+            foreach (var files in System.IO.Directory.GetFiles(sourPath))
+            {
+                var fileName = System.IO.Path.GetFileName(files);
+                var fileExtension = System.IO.Path.GetExtension(files);
+                var destFilePath = System.IO.Path.Combine(destPath, fileName);
+
+                if (fileExtension != ".meta")
+                    System.IO.File.Copy(files, destFilePath, true);
+
+            }
+
+        }
+#endif
+
 
         public class CommandLineReader
         {
@@ -320,6 +353,9 @@ namespace ControlRoom
 
             public static string GetCustomArgument(string argumentName)
             {
+                if (!Application.isBatchMode)
+                    return string.Empty;
+
                 Dictionary<string, string> dicCustomArgs = GetCustomArguments();
                 if (dicCustomArgs.ContainsKey(argumentName))
                     return dicCustomArgs[argumentName];

@@ -4,7 +4,7 @@ using UnityEngine;
 using System.Threading.Tasks;
 namespace ControlRoom
 {
-    public class TableBaseDataManager 
+    public class TableBaseDataManager
     {
         protected virtual TableManager.GoogleDocsID currentTableId => TableManager.GoogleDocsID.NONE;
 
@@ -23,7 +23,7 @@ namespace ControlRoom
 
         public async Task LoadBinaryData()
         {
-            if (currentTableId== TableManager.GoogleDocsID.NONE)
+            if (currentTableId == TableManager.GoogleDocsID.NONE)
             {
                 UnityEngine.Debug.LogError("Google Docs ID is None.");
                 return;
@@ -31,7 +31,7 @@ namespace ControlRoom
             }
             await TableDataLoader.LoadData((int)currentTableId, (System.IO.BinaryReader reader) =>
             {
-                ConverBinaryData(reader);
+                ConvertBinaryData(reader);
                 TableManager.Instance.LoadCompleteTableData(currentTableId);
                 AfterLoadComplete();
             });
@@ -60,41 +60,30 @@ namespace ControlRoom
         {
             foreach (var tableData in data.dicTableData)
             {
-               
-                DataForm dataform = new DataForm();
-                dataform.SetDataValues(tableData.Value);
-
-                SetTableData(dataform);
-
+                SetTableData(tableData.Value);
             }
-
         }
 
-        private void ConverBinaryData(System.IO.BinaryReader reader)
+        private void ConvertBinaryData(System.IO.BinaryReader reader)
         {
-            DataForm data = new DataForm();
-            data.ReadBinary(reader);
-
-            SetTableData(data);
-
+            SetBinaryTableData(reader);
         }
 
         void ConvertAndWriteBinaryData(TableData data, System.IO.BinaryWriter writer)
         {
             foreach (var tableData in data.dicTableData)
             {
-               
-                DataForm dataform = new DataForm();
-                dataform.SetDataValues(tableData.Value);
 
-                dataform.WriteBinary(writer);
+                ReadAndWriteBinaryTableData(tableData.Value, writer);
 
             }
         }
-               
-        protected virtual void SetTableData(DataForm data) { }
+
+        protected virtual void SetTableData(Dictionary<string, string> tableData) { }
+        protected virtual void SetBinaryTableData(System.IO.BinaryReader reader) { }
+        protected virtual void ReadAndWriteBinaryTableData(Dictionary<string, string> tableData, System.IO.BinaryWriter writer) { }
         protected virtual void AfterLoadComplete() { }
-        
+
     }
 
 }

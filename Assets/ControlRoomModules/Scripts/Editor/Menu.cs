@@ -27,6 +27,14 @@ namespace ControlRoom
             }
             
         }
+
+        [MenuItem("ControlRoom/Build/BuidTableAndCopyToStreamingAssets")]
+        static void BuildTableAndCopyToStreamingAssets()
+        {
+            BatchBuilder.BuildAndMoveTableData();
+
+        }
+
 #endif
 
         [MenuItem("ControlRoom/Build/BuildClient(AOS)")]

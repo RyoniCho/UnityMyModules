@@ -66,7 +66,9 @@ namespace ControlRoom
         {
             UnityEngine.Debug.Log("CSV TABLE Build START");
             stopwatch.Start();
+#if UNITY_EDITOR
             EditorUtility.DisplayProgressBar("테이블 빌드 (To CSV)", "테이블 빌드중입니다.", 0f);
+#endif
             var maxCount = System.Enum.GetValues(typeof(TableManager.GoogleDocsID)).Length- 1;
             buildCount = 0;
 
@@ -77,43 +79,52 @@ namespace ControlRoom
                 if (id != TableManager.GoogleDocsID.NONE)
                 {
                     await DownloadCSVAndCreateFile((int)id);
+#if UNITY_EDITOR
                     EditorUtility.DisplayProgressBar("테이블 빌드 (To CSV)", "테이블 빌드중입니다.", (float)buildCount/maxCount);
+#endif
                 }
                     
             }
             
             UnityEngine.Debug.Log("CSV TABLE Build END");
             stopwatch.Stop();
-
+#if UNITY_EDITOR
             EditorUtility.ClearProgressBar();
+#endif
 
             UnityEngine.Debug.Log($"CSV Table Build ElapsTime:{stopwatch.ElapsedMilliseconds}");
         }
 
-        public static async void BuildTableDataFromBinary()
+        public static async Task BuildTableDataFromBinary()
         {
             UnityEngine.Debug.Log("Binary Table Build START");
             stopwatch.Start();
-
+#if UNITY_EDITOR
             EditorUtility.DisplayProgressBar("테이블 빌드 (To Binary)", "테이블 빌드중입니다.", 0f);
+#endif
             var maxCount = System.Enum.GetValues(typeof(TableManager.GoogleDocsID)).Length - 1;
             buildCount = 0;
                      
             await TableManager.Instance.BuildBinaryDataAll(()=> 
             {
+
+#if UNITY_EDITOR
                 EditorUtility.DisplayProgressBar("테이블 빌드 (To Binary)", "테이블 빌드중입니다.", (float)buildCount / maxCount);
+#endif
             });
            
             UnityEngine.Debug.Log("Binary Table Build END");
             stopwatch.Stop();
+#if UNITY_EDITOR
             EditorUtility.ClearProgressBar();
+#endif
 
             UnityEngine.Debug.Log($"Binary Table Build ElapsTime:{stopwatch.ElapsedMilliseconds}");
         }
 
       
     }
-
+#if UNITY_EDITOR
     [InitializeOnLoad]
     public class AddDefineSymbols : Editor
     {
@@ -130,5 +141,6 @@ namespace ControlRoom
 
         }
     }
+#endif
 }
 

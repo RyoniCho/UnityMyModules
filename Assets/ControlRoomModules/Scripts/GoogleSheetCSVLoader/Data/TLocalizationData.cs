@@ -62,6 +62,7 @@ public class LocalizationDataManager: TableBaseDataManager
     public bool LoadComplete = false;
     private UnityEngine.SystemLanguage language= SystemLanguage.English;
     protected override TableManager.GoogleDocsID currentTableId => TableManager.GoogleDocsID.LOCALIZATION;
+    private bool initializeCurrentLanguage = false;
 
     public SystemLanguage CurrentLanguage
     {
@@ -73,7 +74,7 @@ public class LocalizationDataManager: TableBaseDataManager
     
     private Dictionary<int, LocalizationData> dicLocalization = new Dictionary<int, LocalizationData>();
 
-    private void GetCurrentLanguageSettings()
+    public void GetCurrentLanguageSettings()
     {
         var sysLanguage= Application.systemLanguage;
 
@@ -95,10 +96,30 @@ public class LocalizationDataManager: TableBaseDataManager
 
     }
 
-    protected override void SetTableData(DataForm dataform)
+    protected override void SetTableData(Dictionary<string, string> tableData)
     {
-        LocalizationData LocalizationData = new LocalizationData((TLocalizationData)dataform);
+        TLocalizationData tData = new TLocalizationData();
+        tData.SetDataValues(tableData);
+
+
+        LocalizationData LocalizationData = new LocalizationData(tData);
         dicLocalization.Add(LocalizationData.index, LocalizationData);
+    }
+
+    protected override void SetBinaryTableData(System.IO.BinaryReader reader)
+    {
+        TLocalizationData tData = new TLocalizationData();
+        tData.ReadBinary(reader);
+
+        LocalizationData LocalizationData = new LocalizationData(tData);
+        dicLocalization.Add(LocalizationData.index, LocalizationData);
+    }
+
+    protected override void ReadAndWriteBinaryTableData(Dictionary<string, string> tableData, System.IO.BinaryWriter writer)
+    {
+        TLocalizationData tData = new TLocalizationData();
+        tData.SetDataValues(tableData);
+        tData.WriteBinary(writer);
     }
 
     protected override void AfterLoadComplete()
@@ -120,7 +141,13 @@ public class LocalizationDataManager: TableBaseDataManager
             return null;
         }
 
-        switch(this.language)
+        if (!initializeCurrentLanguage)
+        {
+            GetCurrentLanguageSettings();
+            initializeCurrentLanguage = true;
+        }
+
+        switch (this.language)
         {
             case SystemLanguage.English:
                 return dicLocalization[stageIndex].english;

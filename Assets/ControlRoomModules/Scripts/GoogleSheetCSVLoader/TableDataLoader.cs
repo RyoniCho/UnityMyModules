@@ -19,7 +19,7 @@ namespace ControlRoom
         public delegate void CallBack(TableData tData);
         public delegate void GoogleSheetDownloadCallback(string rawText);
         public delegate void BinaryLoadCallback(System.IO.BinaryReader reader);
-
+        public static string DataPath;
         
         private static async Task LoadOnlineTableDataFromGoogleSheet(int docsId, CallBack callBack)
         {
@@ -56,7 +56,6 @@ namespace ControlRoom
 
         static async Task DownloadOnlineCSV(int docsId, GoogleSheetDownloadCallback callback)
         {
-            //StartCoroutine(RequestToDownloadGoogleDocs(docsId, callback));
             await RequestToDownloadGoogleDocs(docsId, callback); 
             
         }
@@ -90,9 +89,16 @@ namespace ControlRoom
 
         static async Task LoadBinaryFile(int docsId, BinaryLoadCallback callback)
         {
+
+            
             await Task.Run(() =>
             {
-                var binPath = $"{Application.dataPath}/Resources/Table/{((TableManager.GoogleDocsID)docsId).ToString().ToLower()}.bin";
+#if UNITY_EDITOR
+                var binPath = $"{DataPath}/Resources/Table/{((TableManager.GoogleDocsID)docsId).ToString().ToLower()}.bin";
+
+#else
+                var binPath = $"{DataPath}/Table/{((TableManager.GoogleDocsID)docsId).ToString().ToLower()}.bin";
+#endif
                 try
                 {
                     var bytes = System.IO.File.ReadAllBytes(binPath);
@@ -107,37 +113,14 @@ namespace ControlRoom
                         }
                     }
                 }
-                catch
+                catch (Exception e)
                 {
-                    Debug.LogError(string.Format("{0} - local Binary data could not loaded", docsId));
+                    Debug.LogError($"{binPath} - local Binary data could not loaded \n Exceptions: {e}");
                 }
             });
             
            
         }
-
-
-        //IEnumerator RequestToDownloadGoogleDocs(int docsId, GoogleSheetDownloadCallback callBack)
-        //{
-        //    string docsKey=TableManager.docsKey;
-
-        //    string url = string.Format(baseUrl, docsKey, docsId);
-        //    UnityWebRequest request = UnityWebRequest.Get(url);
-          
-
-        //    yield return request.SendWebRequest();
-
-        //    if(request.result==UnityWebRequest.Result.ConnectionError||request.result==UnityWebRequest.Result.ProtocolError)
-        //    {
-        //        Debug.LogError("Network Error");
-        //    }
-        //    else
-        //    {
-        //        callBack(request.downloadHandler.text);
-                
-        //    }
-
-        //}
 
          static async Task RequestToDownloadGoogleDocs(int docsId, GoogleSheetDownloadCallback callBack)
          {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using ControlRoom;
+using System.IO;
 
 public class TItemData : DataForm
 {
@@ -45,16 +46,44 @@ public class ItemDataManager: TableBaseDataManager
     
 
     protected override void AfterLoadComplete() {}
-       
 
-    protected override void SetTableData(DataForm data)
+
+    protected override void SetTableData(Dictionary<string, string> tableData)
     {
-        ItemData itemData = new ItemData((TItemData)data);
+
+        TItemData tItemData = new TItemData();
+        tItemData.SetDataValues(tableData);
+
+
+        ItemData itemData = new ItemData(tItemData);
         dicItemData.Add(itemData.itemIndex, itemData);
     }
+    protected override void SetBinaryTableData(System.IO.BinaryReader reader)
+    {
+        TItemData tItemData = new TItemData();
+        tItemData.ReadBinary(reader);
 
- 
+        ItemData itemData = new ItemData(tItemData);
+        dicItemData.Add(itemData.itemIndex, itemData);
+    }
+    protected override void ReadAndWriteBinaryTableData(Dictionary<string, string> tableData, BinaryWriter writer)
+    {
+        TItemData tItemData = new TItemData();
+        tItemData.SetDataValues(tableData);
+        tItemData.WriteBinary(writer);
+    }
 
-    
+    public ItemData GetItemData(int index)
+    {
+        if (dicItemData.ContainsKey(index))
+        {
+            return dicItemData[index];
+        }
+
+        UnityEngine.Debug.LogError($"{index} is not contain itemdata");
+        return null;
+    }
+
+
 
 }
