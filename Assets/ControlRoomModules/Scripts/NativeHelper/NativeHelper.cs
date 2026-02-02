@@ -132,5 +132,20 @@ public class NativeHelper
         UnityEngine.Debug.Log($"NativeHelper Call Test {testBool}/{intTest}/{floatTest}");
     }
 
+    public static void CheckCurrentRuntimePlatform()
+    {
+#if UNITY_IOS
+        UnityEngine.Debug.Log("iOS Platform!");
+#elif UNITY_STANDALONE
+        UnityEngine.Debug.Log("Standalone Platform!");
+
+#endif
+        UnityEngine.Debug.Log($"Current Runtime platform is {Application.platform}");
+
+        UnityEngine.Debug.Log($"Check iOS App on Mac: { UnityEngine.iOS.Device.iosAppOnMac}");
+
+
+    }
+
 
 }
