@@ -13,15 +13,15 @@ public class SMSample : MonoBehaviour
         ATTACK,
     }
 
-    private StateMachine<SMSample> stateMachine;
+    private StateMachine<SMSample,STATE> stateMachine;
     public STATE CurrentState => (STATE)this.stateMachine?.CurrentState;
 
     private void Awake()
     {
-        this.stateMachine = new StateMachine<SMSample>(this);
-        this.stateMachine.RegistState<STATE>(STATE.IDLE, new IDLE());
-        this.stateMachine.RegistState<STATE>(STATE.MOVE, new MOVE());
-        this.stateMachine.RegistState<STATE>(STATE.ATTACK, new ATTACK());
+        this.stateMachine = new StateMachine<SMSample,STATE>(this);
+        this.stateMachine.RegistState(STATE.IDLE, new IDLE());
+        this.stateMachine.RegistState(STATE.MOVE, new MOVE());
+        this.stateMachine.RegistState(STATE.ATTACK, new ATTACK());
 
 
         if (this.stateMachine != null)
@@ -30,7 +30,7 @@ public class SMSample : MonoBehaviour
     }
 
 
-    public class IDLE : State<SMSample>
+    public class IDLE : State<SMSample,STATE>
     {
         public override void OnEnterState()
         {
@@ -47,7 +47,7 @@ public class SMSample : MonoBehaviour
             //On Update Idle State
 
             //Random Transition
-            var nextState = this.stateMachine.GetRandomState<STATE>();
+            var nextState = this.stateMachine.GetRandomState();
             Debug.Log($"MOVE TO NEXT STATE: {nextState}");
             this.stateMachine.SetState(nextState);
 
@@ -55,7 +55,7 @@ public class SMSample : MonoBehaviour
         }
     }
 
-    public class MOVE : State<SMSample>
+    public class MOVE : State<SMSample,STATE>
     {
         private float moveSpeed = 4;
         public override void OnEnterState()
@@ -74,7 +74,7 @@ public class SMSample : MonoBehaviour
         }
     }
 
-    public class ATTACK :State<SMSample>
+    public class ATTACK :State<SMSample,STATE>
     {
         private float maxStateTime = 1f;
         public override void OnEnterState()
@@ -89,7 +89,7 @@ public class SMSample : MonoBehaviour
 
         public override void OnUpdateState()
         {
-            if (this.stateMachine.CheckStateElapseTime(maxStateTime))
+            if (this.stateMachine.CheckElapseTimeToFinsishState(maxStateTime))
             {
                 this.stateMachine.SetState(STATE.IDLE);
             }

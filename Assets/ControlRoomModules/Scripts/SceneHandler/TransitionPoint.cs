@@ -23,40 +23,52 @@ namespace ControlRoom
             ExternalCall, OnTriggerEnter,
         }
 
-
+       
         [Tooltip("This is the gameobject that will transition.  For example, the player.")]
         public GameObject transitioningGameObject;
+        // [Tooltip("If true, Compare gameobject tag that will transition. not equality of gameobject")]
+        // public bool CompareGameObjectTag = true;
+        public bool CompareLayerMask = true;
+        public LayerMask checkLayer;
         [Tooltip("Whether the transition will be within this scene, to a different zone or a non-gameplay scene.")]
         public TransitionType transitionType;
 
         public string newSceneName;
         [Tooltip("The tag of the SceneTransitionDestination script in the scene being transitioned to.")]
         public SceneTransitionDestination.DestinationTag transitionDestinationTag;
-        [Tooltip("The destination in this scene that the transitioning gameobject will be teleported.")]
-        public TransitionPoint destinationTransform;
+      
         [Tooltip("What should trigger the transition to start.")]
         public TransitionWhen transitionWhen;
-        [Tooltip("Is this transition only possible with specific items in the inventory?")]
-        public bool requiresInventoryCheck;
-        //[Tooltip("The inventory to be checked.")]
-        //public Gamekit3D.InventoryController inventoryController;
-        //[Tooltip("The required items.")]
-        //public Gamekit3D.InventoryController.InventoryChecker inventoryCheck;
+       
+        
 
         public Transform detinationFromLoadFile;
 
-        bool m_TransitioningGameObjectPresent;
-
-        void Start()
-        {
-            if (transitionWhen == TransitionWhen.ExternalCall)
-                m_TransitioningGameObjectPresent = true;
-        }
+       
         void OnTriggerEnter(Collider other)
         {
-            if (other.gameObject == transitioningGameObject)
+           
+            var triggerOn = (CompareLayerMask) ? (Utils.CheckLayerMask(checkLayer,other.gameObject.layer)) : (other.gameObject == transitioningGameObject);
+
+            if (triggerOn)
             {
-                m_TransitioningGameObjectPresent = true;
+               
+                if (ScreenFader.IsFading || SceneController.Transitioning)
+                    return;
+
+                if (transitionWhen == TransitionWhen.OnTriggerEnter)
+                    TransitionInternal();
+            }
+        }
+
+        private void OnTriggerEnter2D(Collider2D other)
+        {
+           
+            var triggerOn = (CompareLayerMask) ? (Utils.CheckLayerMask(checkLayer,other.gameObject.layer)) : (other.gameObject == transitioningGameObject);
+            
+            if (triggerOn)
+            {
+               
 
                 if (ScreenFader.IsFading || SceneController.Transitioning)
                     return;
@@ -66,26 +78,24 @@ namespace ControlRoom
             }
         }
 
-        void OnTriggerExit(Collider other)
-        {
-            if (other.gameObject == transitioningGameObject)
-            {
-                m_TransitioningGameObjectPresent = false;
-            }
-        }
 
         protected void TransitionInternal()
         {
-            //if (requiresInventoryCheck)
-            //{
-            //    if (!inventoryCheck.CheckInventory(inventoryController))
-            //        return;
-            //}
+            
 
+            
             if (transitionType == TransitionType.SameScene)
             {
-                //GameObjectTeleporter.Teleport(transitioningGameObject, destinationTransform.transform);
+                var destination = SceneController.Instance.GetDestination(transitionDestinationTag);
+
+                if(destination!=null)
+                {
+                    transitioningGameObject.transform.position = destination.transform.position;
+                    transitioningGameObject.transform.rotation = destination.transform.rotation;
+                }
+
             }
+
             else
             {
                 SceneController.TransitionToScene(this);
@@ -94,11 +104,10 @@ namespace ControlRoom
 
         public void Transition()
         {
-
-            if (m_TransitioningGameObjectPresent)
-                if (transitionWhen == TransitionWhen.ExternalCall)
-                    TransitionInternal();
+            if (transitionWhen == TransitionWhen.ExternalCall)
+                TransitionInternal();
         }
+        
         public void TransitionByLoadFile()
         {
             TransitionInternal();

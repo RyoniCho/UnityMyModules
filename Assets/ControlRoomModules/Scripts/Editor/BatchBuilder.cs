@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.IO;
 using UnityEditor;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine.Networking;
 namespace ControlRoom
 {
@@ -121,6 +123,14 @@ namespace ControlRoom
             PlayerSettings.Android.keystorePass = Config.androidKeyStorePassword;
             PlayerSettings.Android.keyaliasPass = Config.androidKeyAliasPassword;
 
+            PlayerSettings.defaultInterfaceOrientation = UIOrientation.AutoRotation;
+            PlayerSettings.allowedAutorotateToLandscapeLeft = true;
+            PlayerSettings.allowedAutorotateToLandscapeRight = true;
+            PlayerSettings.allowedAutorotateToPortrait = false;
+            PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
+            
+            SetJDKPath();
+
             if (Config.isDebugMode == true)
             {
                 EditorUserBuildSettings.development = true;
@@ -145,8 +155,10 @@ namespace ControlRoom
                     return;
                 }
             }
-
-            Config.BuildPath = buildPath + APP_NAME + "_" + version;
+            
+            Config.WriteXml();
+            
+            Config.BuildPath = Config.BuildPath +"/"+ APP_NAME + "_" + Config.Version;
 
             if (Config.useAppBundle ==true)
             {
@@ -158,6 +170,11 @@ namespace ControlRoom
                 Config.BuildPath += ".apk";
                 EditorUserBuildSettings.buildAppBundle = false;
             }
+            
+           
+            
+            CopyFolder($"{Application.dataPath}/Resources/Table", $"{Application.streamingAssetsPath}/Table");
+
 
 
             AssetDatabase.Refresh();
@@ -218,6 +235,12 @@ namespace ControlRoom
             PlayerSettings.iOS.buildNumber = Config.VersionCode;
             PlayerSettings.iOS.targetOSVersionString = Config.iOSMinimalOSVersionString;
 
+            PlayerSettings.defaultInterfaceOrientation = UIOrientation.AutoRotation;
+            PlayerSettings.allowedAutorotateToLandscapeLeft = true;
+            PlayerSettings.allowedAutorotateToLandscapeRight = true;
+            PlayerSettings.allowedAutorotateToPortrait = false;
+            PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
+
             if (Config.isIOSSimulatorBuild==true)
             {
                 PlayerSettings.iOS.sdkVersion = iOSSdkVersion.SimulatorSDK;
@@ -253,56 +276,99 @@ namespace ControlRoom
                 }
             }
 
-            Config.BuildPath = System.IO.Path.Join(buildPath,APP_NAME + "_" + version);
-#if TABLE_DATA_BUILDER
-            //BuildAndMoveTableData();
-#endif
+            CopyFolder($"{Application.dataPath}/Resources/Table", $"{Application.streamingAssetsPath}/Table");
+          
+            Config.WriteXml();
+            
+            Config.BuildPath = Config.BuildPath +"/"+ APP_NAME + "_" + Config.Version;
+            
             AssetDatabase.Refresh();
 
             GenericBuild(SCENES, Config.BuildPath, BuildTarget.iOS, BuildOptions.None);
         }
 
+        public static void BuildBinaryTable()
+        {
+            TableDataBuilder.BuildTableDataFromBinary();
+        }
+
+        private static void CopyFolder(string sourceFolder, string destFolder)
+        {
+            if (!Directory.Exists(destFolder))
+            {
+                Directory.CreateDirectory(destFolder);
+            }
+
+            string[] files = Directory.GetFiles(sourceFolder);
+            string[] folders = Directory.GetDirectories(sourceFolder);
+
+            foreach (var file in files)
+            {
+                string name = Path.GetFileName(file);
+                string dest = Path.Combine(destFolder, name);
+                
+                File.Copy(file,dest,true);
+            }
+
+            foreach (var folder in folders)
+            {
+                string name = Path.GetFileName(folder);
+                string dest = Path.Combine(destFolder, name);
+                CopyFolder(folder,dest);
+            }
+        }
 
         static void GenericBuild(string[] scenes, string target_dir, BuildTarget build_target, BuildOptions build_options)
         {
-            UnityEngine.Debug.Log("Generic Build");
-            var res = BuildPipeline.BuildPlayer(scenes, target_dir, build_target, build_options);
+            try
+            {
+                UnityEngine.Debug.Log("Generic Build");
+                var res = BuildPipeline.BuildPlayer(scenes, target_dir, build_target, build_options);
 
-            //if (res.summary.totalErrors > 0)
-            //throw new Exception(res.summary.result.ToString());
+                if (res.summary.result != UnityEditor.Build.Reporting.BuildResult.Succeeded)
+                {
+                    UnityEngine.Debug.LogError("Generic Build Failed");
+
+                    if(UnityEngine.Application.isBatchMode)
+                        UnityEditor.EditorApplication.Exit(1);
+
+                    throw new System.Exception("Generic Build Failed");
+
+                }
+                   
+
+            }
+            catch(Exception e)
+            {
+                UnityEngine.Debug.LogError($"Generic Build Exceptions: {e}");
+                
+                if(UnityEngine.Application.isBatchMode)
+                    UnityEditor.EditorApplication.Exit(1);
+            }
+
+            // if (res.summary.totalErrors > 0)
+            // throw new Exception(res.summary.result.ToString());
 
         }
-#if TABLE_DATA_BUILDER
-        public static async void BuildAndMoveTableData()
+
+        static void SetJDKPath()
         {
-            UnityEngine.Debug.Log("Start Table Build -Binary ");
+            string editorPath = EditorApplication.applicationPath;
+            string rootPath = System.IO.Path.GetDirectoryName(editorPath);
+            string jdkPath = System.IO.Path.Combine(rootPath, "Data", "PlaybackEngines", "AndroidPlayer", "OpenJDK");
+            
+            Environment.SetEnvironmentVariable("JAVA_HOME",jdkPath);
 
-            await TableDataBuilder.BuildTableDataFromBinary();
-
-            UnityEngine.Debug.Log("Table Build End");
-
-            var sourPath = $"{UnityEngine.Application.dataPath }/Resources/Table/";
-            var destPath = $"{UnityEngine.Application.streamingAssetsPath}/Table/";
-            if (!System.IO.Directory.Exists(destPath))
+            if (string.IsNullOrEmpty(UnityEditor.EditorPrefs.GetString("JdkPath")))
             {
-                System.IO.Directory.CreateDirectory(destPath);
+                EditorPrefs.SetString("JdkPath",jdkPath);
+                Debug.Log($"Set JDK Path:{jdkPath}");
             }
-
-
-            foreach (var files in System.IO.Directory.GetFiles(sourPath))
+            else
             {
-                var fileName = System.IO.Path.GetFileName(files);
-                var fileExtension = System.IO.Path.GetExtension(files);
-                var destFilePath = System.IO.Path.Combine(destPath, fileName);
-
-                if (fileExtension != ".meta")
-                    System.IO.File.Copy(files, destFilePath, true);
-
+                Debug.LogError($"JDK path has already set :{jdkPath}");
             }
-
         }
-#endif
-
 
         public class CommandLineReader
         {
@@ -328,8 +394,9 @@ namespace ControlRoom
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError("GetCustomArgument Error: [" + commandLingArgs + "]. Exception: " + e);
-                    EditorApplication.Exit(1);
+                    Debug.LogWarning("GetCustomArgument Error: [" + commandLingArgs + "]. Exception: " + e);
+                    if(UnityEngine.Application.isBatchMode)
+                     EditorApplication.Exit(1);
                 }
 
                 customArgsStr = customArgsStr.Replace(CUSTOM_ARGS_PREFIX, "");
@@ -351,16 +418,13 @@ namespace ControlRoom
                 return dicCustomArgs;
             }
 
-            public static string GetCustomArgument(string argumentName)
+            public static string GetCustomArgument(string argumentName, string defaultValue="")
             {
-                if (!Application.isBatchMode)
-                    return string.Empty;
-
                 Dictionary<string, string> dicCustomArgs = GetCustomArguments();
                 if (dicCustomArgs.ContainsKey(argumentName))
                     return dicCustomArgs[argumentName];
                 else
-                    return string.Empty;
+                    return defaultValue;
 
             }
         }

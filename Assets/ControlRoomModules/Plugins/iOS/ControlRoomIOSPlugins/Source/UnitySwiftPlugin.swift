@@ -9,20 +9,40 @@ import Foundation
 import UIKit
 import AVFoundation
 import Photos
+import GameController
+
+
+
 
 
 @objc public class UnitySwiftPlugin: NSObject
 {
     @objc public static let shared = UnitySwiftPlugin()
     var parentView :UIView!
+    private var currentPoint: CGPoint = .zero
     
     override public init() {
         
         self.parentView = UIApplication.shared.delegate?.window??.rootViewController?.view
         
         super.init()
+        
+        setupPointerInteraction()
                
     }
+    
+    private func setupPointerInteraction() {
+            if let window = UIApplication.shared.windows.first {
+                if #available(iOS 13.4, *) {
+                    let pointerInteraction = UIPointerInteraction(delegate: self)
+                    window.addInteraction(pointerInteraction)
+                }
+            }
+        }
+    
+    @objc public func getCurrentMousePosition() -> CGPoint {
+            return currentPoint
+        }
     
 
     @objc public func ShowToast(message:String)
@@ -178,19 +198,19 @@ import Photos
         
     }
     
-    @objc public func ShowNativeAlertPopup(title:String, message:String, setCancelButton:Bool, okCallback: @escaping @convention(c) ()-> Swift.Void, cancelCallback: @escaping @convention(c) ()-> Swift.Void)
+    @objc public func ShowNativeAlertPopup(methodId:Int, title:String, message:String, setCancelButton:Bool, okCallback: @escaping @convention(c) (_ methodid:Int)-> Swift.Void, cancelCallback: @escaping @convention(c) (_ methodid:Int)-> Swift.Void)
     {
         let alert = UIAlertController(title:title,message: message,preferredStyle: .alert)
         
         let defalutAction = UIAlertAction(title:"OK",style: .default){(action) in
             print("ShowNativeAlertPopup: Ok Action")
-            okCallback()
+            okCallback(methodId)
         }
         
         let cancelAction = UIAlertAction(title:"Cancel",style: .default){
             (action) in
             print("ShowNativeAlertPopup: Cancel Action")
-            cancelCallback()
+            cancelCallback(methodId)
         }
         
         alert.addAction(defalutAction)
@@ -208,6 +228,112 @@ import Photos
         
     }
     
+    
+    @objc public func AddObserverGCKeyboard(methodId: Int, eventCallback: @escaping @convention(c) (_ methodid:Int, _ status:Bool)-> Swift.Void)
+    {
+    
+        if #available(iOS 14.0, *) 
+        {
+            NotificationCenter.default.addObserver(forName: .GCKeyboardDidConnect, object: nil, queue: .main){_ in eventCallback(methodId,true)}
+            NotificationCenter.default.addObserver(forName: .GCKeyboardDidDisconnect, object: nil, queue: .main){_ in eventCallback(methodId,false)}
+        } 
+        
+    }
+    
+     @objc public func AddObserverGCController(methodId: Int, eventCallback: @escaping @convention(c) (_ methodid:Int, _ status:Bool)-> Swift.Void)
+        {
+        
+            if #available(iOS 14.0, *) 
+            {
+                NotificationCenter.default.addObserver(forName: .GCControllerDidConnect, object: nil, queue: .main){_ in eventCallback(methodId,true)}
+                NotificationCenter.default.addObserver(forName: .GCControllerDidDisconnect, object: nil, queue: .main){_ in eventCallback(methodId,false)}
+            } 
+          
+        
+        }
+     @objc public func AddObserverGCMouse(methodId: Int, eventCallback: @escaping @convention(c) (_ methodid: Int, _ status: Bool) ->Swift.Void)
+     {
+             if #available(iOS 14.0, *)
+             {
+                 NotificationCenter.default.addObserver(forName: .GCMouseDidConnect, object: nil, queue: .main){_ in eventCallback(methodId,true)}
+                 NotificationCenter.default.addObserver(forName: .GCMouseDidDisconnect, object: nil, queue: .main){_ in eventCallback(methodId,false)}
+             }
+               
+     }
+
+     @objc public func IsAnyExternalKeyboardConnected()->Bool
+     {
+        
+        if #available(iOS 14.0, *) 
+        {
+            if GCKeyboard.coalesced != nil
+            {
+                return true
+            }
+            
+        }
+       
+        return false
+           
+     }
+     @objc public func IsAnyExternalGamepadConnected()->Bool
+     {
+             
+             if #available(iOS 14.0, *) 
+             {
+                 if GCController.current != nil
+                 {
+                     return true
+                 }
+                 
+             }
+            
+             return false
+                
+     }
+     
+     @objc public func IsAnyExternalMouseConnected()->Bool
+         {
+            
+            if #available(iOS 14.0, *)
+            {
+                if GCMouse.current != nil
+                {
+                    return true
+                }
+               
+            }
+             return false
+               
+         }
+     @objc public func GetGCMouseScrollYAxisValue() -> Float
+         {
+             if #available(iOS 14.0, *)
+             {
+                 if let gcMouse = GCMouse.current 
+                 {
+                     return gcMouse.mouseInput?.scroll.yAxis.value ?? 0
+                 }
+             }
+             
+             return 0
+         }
+     @objc public func GetGCMouseScrollXAxisValue() -> Float
+        {
+                 if #available(iOS 14.0, *)
+                 {
+                     if let gcMouse = GCMouse.current
+                     {
+                         return gcMouse.mouseInput?.scroll.xAxis.value ?? 0
+                     }
+                 }
+                 
+                 return 0
+        }
+    
+    
+    
+     
     
     class PaddingUILabel: UILabel
     {
@@ -228,5 +354,13 @@ import Photos
                 
             }
         }
+    }
+}
+
+extension UnitySwiftPlugin: UIPointerInteractionDelegate {
+    @available(iOS 13.4, *)
+    public func pointerInteraction(_ interaction: UIPointerInteraction, regionFor request: UIPointerRegionRequest, defaultRegion: UIPointerRegion) -> UIPointerRegion? {
+        currentPoint = request.location
+        return nil
     }
 }

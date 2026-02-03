@@ -1,89 +1,71 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using ControlRoom;
 using System.IO;
+using ControlRoom;
 
 public class TItemData : DataForm
 {
 
-    public TInt itemIndex;
-    public TString itemName;
-    public TString itemType;
-    public TInt grade;
-    public TString desc;
-
-    
+    public TableType<int> itemIndex;
+    public TableType<string> itemName;
+    public TableType<string> itemType;
+    public TableType<int> itemValue;
+    public TableType<int> grade;
+    public TableType<string> desc;
 
     public TItemData()
     {
-        itemIndex = new TInt("itemIndex", this);
-        itemName = new TString("itemName", this);
-        itemType = new TString("itemType", this);
-        grade = new TInt("grade", this);
-        desc = new TString("desc", this);
+        itemIndex = new TableType<int>("itemIndex", this);
+        itemName = new TableType<string>("itemName", this);
+        itemType = new TableType<string>("itemType", this);
+        itemValue = new TableType<int>("itemValue", this);
+        grade = new TableType<int>("grade", this);
+        desc = new TableType<string>("desc", this);
     }
 }
 
-public class ItemData
+public class ItemData : ITableData ,IKeyProvider<int>
 {
     public int itemIndex;
     public string itemName;
+    public string itemType;
+    public int itemValue;
+    public int itemGrade;
+    public string itemDesc;
 
-    public ItemData(TItemData data)
+    public void SetValue(DataForm dataform)
     {
-        itemIndex = data.itemIndex.Value;
-        itemName = data.itemName.Value;
-        
+        TItemData tData = dataform as TItemData;
+
+        if (tData != null)
+        {
+            itemIndex = tData.itemIndex.Value;
+            itemName = tData.itemName.Value;
+            itemValue = tData.itemValue.Value;
+            itemDesc = tData.desc.Value;
+            itemGrade = tData.grade.Value;
+        }
     }
+
+    public int GetKey()
+    {
+        return itemIndex;
+    }
+ 
 }
 
 
-public class ItemDataManager: TableBaseDataManager
+public class ItemDataManager: TableBaseDataManager<ItemData,TItemData,int>
 {
-    Dictionary<int, ItemData> dicItemData = new Dictionary<int, ItemData>();
+  
     protected override TableManager.GoogleDocsID currentTableId => TableManager.GoogleDocsID.ITEM;
-    
-
-    protected override void AfterLoadComplete() {}
-
-
-    protected override void SetTableData(Dictionary<string, string> tableData)
+    public ItemData GetItemData(int itemIndex)
     {
+        if (dicDatas.TryGetValue(itemIndex, out var itemData))
+            return itemData;
 
-        TItemData tItemData = new TItemData();
-        tItemData.SetDataValues(tableData);
-
-
-        ItemData itemData = new ItemData(tItemData);
-        dicItemData.Add(itemData.itemIndex, itemData);
-    }
-    protected override void SetBinaryTableData(System.IO.BinaryReader reader)
-    {
-        TItemData tItemData = new TItemData();
-        tItemData.ReadBinary(reader);
-
-        ItemData itemData = new ItemData(tItemData);
-        dicItemData.Add(itemData.itemIndex, itemData);
-    }
-    protected override void ReadAndWriteBinaryTableData(Dictionary<string, string> tableData, BinaryWriter writer)
-    {
-        TItemData tItemData = new TItemData();
-        tItemData.SetDataValues(tableData);
-        tItemData.WriteBinary(writer);
-    }
-
-    public ItemData GetItemData(int index)
-    {
-        if (dicItemData.ContainsKey(index))
-        {
-            return dicItemData[index];
-        }
-
-        UnityEngine.Debug.LogError($"{index} is not contain itemdata");
         return null;
     }
-
-
 
 }

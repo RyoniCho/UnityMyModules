@@ -17,6 +17,7 @@ namespace ControlRoom
         public ProcessBeforeUnloadingCurrentScene processBeforeUnloadingCurrentScene;
         public ProcessAfterLoadingNextScene processAfterLoadingNextScene;
 
+        private Dictionary<string, TransitionPoint> dicDifferentSceneTransitionPoint = null;
 
         protected override void Awake()
         {
@@ -28,8 +29,42 @@ namespace ControlRoom
                 return;
             }
 
+            SetTransitionPointForDifferentScene();
+
             DontDestroyOnLoad(this.gameObject);
         }
+
+        private void SetTransitionPointForDifferentScene()
+        {
+            var transitionPoints = this.transform.GetComponentsInChildren<TransitionPoint>(true);
+            if( transitionPoints.Length > 0)
+            {
+                this.dicDifferentSceneTransitionPoint = new Dictionary<string, TransitionPoint>();
+                foreach (var tr in transitionPoints)
+                {
+                    if (tr.transitionType == TransitionPoint.TransitionType.DifferentScene)
+                    {
+                        dicDifferentSceneTransitionPoint.Add(tr.newSceneName, tr);
+                    }
+                }
+            }
+
+           
+        }
+
+        public TransitionPoint GetDifferentSceneTP(string sceneName)
+        {
+            if(dicDifferentSceneTransitionPoint!=null)
+            {
+                if(dicDifferentSceneTransitionPoint.ContainsKey(sceneName))
+                {
+                    return dicDifferentSceneTransitionPoint[sceneName];
+                }
+            }
+
+            return null;
+        }
+
         public static bool Transitioning
         {
             get { return Instance.m_Transitioning; }
@@ -40,9 +75,15 @@ namespace ControlRoom
             Instance.StartCoroutine(Instance.Transition(transitionPoint.newSceneName, transitionPoint.transitionDestinationTag, transitionPoint.transitionType));
         }
 
+        public static void TransitionToScene(string sceneName, SceneTransitionDestination.DestinationTag destinationTag)
+        {
+            Instance.StartCoroutine(Instance.Transition(sceneName, destinationTag));
+        }
+
         IEnumerator Transition(string newSceneName, SceneTransitionDestination.DestinationTag destinationTag, TransitionPoint.TransitionType transitionType = TransitionPoint.TransitionType.DifferentScene)
         {
             m_Transitioning = true;
+            ControlRoomInput.DisableInput = true;
 
             //Process Before Unload Current Scene :Save Current Data/Input Disable, etc
             processBeforeUnloadingCurrentScene?.Invoke();
@@ -52,13 +93,14 @@ namespace ControlRoom
 
          
             System.GC.Collect();
+            
+           
 
             //SceneLoad
             yield return SceneManager.LoadSceneAsync(newSceneName);
 
 
-            //Process After Loading Next Scene : Load Current Data/Input Enable, etc
-            processAfterLoadingNextScene?.Invoke();
+           
 
             SceneTransitionDestination entrance = GetDestination(destinationTag);
 
@@ -73,21 +115,24 @@ namespace ControlRoom
             }
 
             SetupNewScene(transitionType, entrance);
+            
+            //Process After Loading Next Scene : Load Current Data/Input Enable, etc
+            processAfterLoadingNextScene?.Invoke();
 
             if (entrance != null)
-                entrance.OnReachDestination?.Invoke();
+                entrance.OnReachDestination.Invoke();
             yield return StartCoroutine(ScreenFader.FadeSceneIn());
-          
 
+            ControlRoomInput.DisableInput = false;
             m_Transitioning = false;
         }
 
 
-        SceneTransitionDestination GetDestination(SceneTransitionDestination.DestinationTag destinationTag)
+        public SceneTransitionDestination GetDestination(SceneTransitionDestination.DestinationTag destinationTag)
         {
 
             //Find Destination in Scene
-            SceneTransitionDestination[] entrances = FindObjectsOfType<SceneTransitionDestination>();
+            SceneTransitionDestination[] entrances = FindObjectsByType<SceneTransitionDestination>(UnityEngine.FindObjectsSortMode.None);
             for (int i = 0; i < entrances.Length; i++)
             {
                 if (entrances[i].destinationTag == destinationTag)
@@ -129,7 +174,7 @@ namespace ControlRoom
             enteringTransform.rotation = entranceLocation.rotation;
         }
 
-        public string CurrentEntranceSceneName
+        public string CurrentSceneName
         {
             get
             {
@@ -137,7 +182,8 @@ namespace ControlRoom
             }
         }
 
-        public string CurrentActiveSceneName => SceneManager.GetActiveScene().name;
+        public string CurrentActiveSceneName =>SceneManager.GetActiveScene().name;
+      
 
     }
 }

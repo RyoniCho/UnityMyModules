@@ -25,12 +25,19 @@ namespace ControlRoom
         /// </summary>
 
 
-        public const string docsKey = "1j_1b-SU5f_llS-yaANJk-hR2kH8T0le6DdkqpfRNoRg";
+        public const string docsKey = "1GzWqze_hxEi45B6PU5VSylnzkLeWUHk5ddh69SV0vdE";
         public enum GoogleDocsID
         {
             NONE=-1,
-            LOCALIZATION = 1724096133,
+            LOCALIZATION = 671532158,
+            CONFIG = 1393723135,
             ITEM = 0,
+            ENEMY=315463931,
+            PLAYER=782103566,
+            TIMELINE=1346251040,
+            QUEST= 1194202679,
+            QUEST_OBJECTIVES=2104579158,
+            DIALOGUE=795091221,
 
         }
 
@@ -39,9 +46,17 @@ namespace ControlRoom
         /// </summary>
         public LocalizationDataManager localization;
         public ItemDataManager item;
+        public ConfigDataManager config;
+        public EnemyDataManager enemy;
+        public PlayerDataManager player;
+        public TimelineDataManager timeline;
+        public QuestDataManager quest;
+        public DialogueDataManager dialogue;
+        public QuestObjectivesDataManager questObjectives;
         
-        public List<TableBaseDataManager> listTableDataManager = new List<TableBaseDataManager>();
-       
+        public List<ITableBaseDataManager> listTableDataManager = new List<ITableBaseDataManager>();
+
+        private bool isInitialzed = false;
         private bool isSetTableDataManager = false;
         private bool isTableLoadComplete = false;
         public bool IsTableLoadComplete => isTableLoadComplete;
@@ -53,11 +68,26 @@ namespace ControlRoom
 
             localization = new LocalizationDataManager();
             item = new ItemDataManager();
+            config = new ConfigDataManager();
+            enemy = new EnemyDataManager();
+            player = new PlayerDataManager();
+            timeline = new TimelineDataManager();
+            quest = new QuestDataManager();
+            dialogue = new DialogueDataManager();
+            questObjectives = new QuestObjectivesDataManager();
+            
 
             listTableDataManager.Clear();
 
             listTableDataManager.Add(localization);
             listTableDataManager.Add(item);
+            listTableDataManager.Add(config);
+            listTableDataManager.Add(enemy);
+            listTableDataManager.Add(player);
+            listTableDataManager.Add(timeline);
+            listTableDataManager.Add(quest);
+            listTableDataManager.Add(dialogue);
+            listTableDataManager.Add(questObjectives);
 
             isSetTableDataManager = true;
 
@@ -82,6 +112,15 @@ namespace ControlRoom
 
 			DontDestroyOnLoad(this.gameObject);
 
+            Initialize();
+
+       }
+
+        public void Initialize()
+        {
+            if (isInitialzed)
+                return;
+            
             RegisterTableDataForLoad();
             SetTableDataManager();
 
@@ -94,8 +133,9 @@ namespace ControlRoom
             TableDataLoader.OnlineMode = IsOnlineLiveLoadMode;
 
             stopwatch = new Stopwatch();
-
-       }
+            
+            isInitialzed = true;
+        }
 
         public void LoadTableCSV()
         {
@@ -110,9 +150,11 @@ namespace ControlRoom
         async void LoadAllTable(bool binaryLoad = false)
         {
             isTableLoadComplete = false;
-
+            
+            if (stopwatch == null)
+                stopwatch = new Stopwatch();
+            
             stopwatch.Start();
-
             if (binaryLoad)
             {
 

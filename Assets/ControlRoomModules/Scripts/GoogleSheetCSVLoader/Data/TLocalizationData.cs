@@ -5,34 +5,34 @@ using ControlRoom;
 
 public class TLocalizationData : DataForm
 {
-    public TInt index;
-    public TString english;
-    public TString korea;
-    public TString taiwanese;
-    public TString portuguese;
-    public TString italian;
-    public TString turkish;
-    public TString russian;
-    public TString french;
-    public TString spainish;
-    public TString japan;
+    public TableType<int> index;
+    public TableType<string> english;
+    public TableType<string> korea;
+    public TableType<string> taiwanese;
+    public TableType<string> portuguese;
+    public TableType<string> italian;
+    public TableType<string> turkish;
+    public TableType<string> russian;
+    public TableType<string> french;
+    public TableType<string> spainish;
+    public TableType<string> japan;
 
     public TLocalizationData()
     {
-        index = new TInt("index", this);
-        english = new TString("English", this);
-        korea = new TString("Korea", this);
-        taiwanese = new TString("Taiwanese",this);
-        portuguese = new TString("Portuguese",this);
-        italian = new TString("Italian", this);
-        turkish = new TString("Turkish", this);
-        russian = new TString("Russian", this);
-        french = new TString("French", this);
-        spainish= new TString("Spanish", this);
-        japan= new TString("Japan", this);
+        index = new TableType<int>("index", this);
+        english = new TableType<string>("English", this);
+        korea = new TableType<string>("Korea", this);
+        taiwanese = new TableType<string>("Taiwanese",this);
+        portuguese = new TableType<string>("Portuguese",this);
+        italian = new TableType<string>("Italian", this);
+        turkish = new TableType<string>("Turkish", this);
+        russian = new TableType<string>("Russian", this);
+        french = new TableType<string>("French", this);
+        spainish= new TableType<string>("Spanish", this);
+        japan= new TableType<string>("Japan", this);
 }
 }
-public class LocalizationData
+public class LocalizationData : ITableData, IKeyProvider<int>
 {
     public int index;
     public string english;
@@ -43,26 +43,60 @@ public class LocalizationData
     public string turkish;
     public string russian;
     public string french;
-    public string spainish;
+    public string spanish;
     public string japan;
 
 
-    public LocalizationData(TLocalizationData tData)
+    public void SetValue(DataForm dataForm)
     {
-        this.index = tData.index.Value;
-        this.english = tData.english.Value;
-        this.korea = tData.korea.Value;
-   
+        var tData = dataForm as TLocalizationData;
+
+        if (tData != null)
+        {
+            this.index = tData.index.Value;
+            this.english = tData.english.Value;
+            this.korea = tData.korea.Value;
+            this.taiwanese = tData.taiwanese.Value;
+            this.portuguese = tData.portuguese.Value;
+            this.italian = tData.italian.Value;
+            this.french = tData.french.Value;
+            this.russian = tData.russian.Value;
+            this.spanish = tData.spainish.Value;
+            this.japan = tData.japan.Value;
+            this.turkish = tData.turkish.Value;
+
+        }
+    }
+
+    public int GetKey()
+    {
+        return this.index;
     }
 }
 
-public class LocalizationDataManager: TableBaseDataManager
+public class LocalizationDataManager: TableBaseDataManager<LocalizationData,TLocalizationData,int>
 {
-    public System.Action<bool> listener;
+    public static System.Action listener;
     public bool LoadComplete = false;
     private UnityEngine.SystemLanguage language= SystemLanguage.English;
     protected override TableManager.GoogleDocsID currentTableId => TableManager.GoogleDocsID.LOCALIZATION;
     private bool initializeCurrentLanguage = false;
+    private int languageIndex = 0;
+
+    public SystemLanguage[] SupportLanguages =
+    {
+        SystemLanguage.English, 
+        SystemLanguage.ChineseTraditional,
+        SystemLanguage.Italian,
+        SystemLanguage.Russian,
+        SystemLanguage.French,
+        SystemLanguage.Spanish,
+        SystemLanguage.Japanese,
+        SystemLanguage.Portuguese,
+        SystemLanguage.Turkish,
+        SystemLanguage.Korean
+        
+    };
 
     public SystemLanguage CurrentLanguage
     {
@@ -72,7 +106,6 @@ public class LocalizationDataManager: TableBaseDataManager
         }
     }
     
-    private Dictionary<int, LocalizationData> dicLocalization = new Dictionary<int, LocalizationData>();
 
     public void GetCurrentLanguageSettings()
     {
@@ -84,58 +117,68 @@ public class LocalizationDataManager: TableBaseDataManager
         {
             case (int)SystemLanguage.English:
                 language = SystemLanguage.English;
+                languageIndex = 0;
                 break;
             case (int)SystemLanguage.Korean:
                 language = SystemLanguage.Korean;
+                languageIndex = 8;
                 break;
-                
+            case (int)SystemLanguage.Japanese:
+                language = SystemLanguage.Japanese;
+                languageIndex = 6;
+                break;
+            case (int)SystemLanguage.Turkish:
+                language = SystemLanguage.Turkish;
+                languageIndex = 7;
+                break;
+            case (int)SystemLanguage.Italian:
+                language = SystemLanguage.Italian;
+                languageIndex = 2;
+                break;
+            case (int)SystemLanguage.Portuguese:
+                language = SystemLanguage.Portuguese;
+                languageIndex = 7;
+                break;
+            case (int)SystemLanguage.Russian:
+                language = SystemLanguage.Russian;
+                languageIndex = 3;
+                break;
+            case (int)SystemLanguage.ChineseTraditional:
+                language = SystemLanguage.ChineseTraditional;
+                languageIndex = 1;
+                break;
+            case (int)SystemLanguage.French:
+                language = SystemLanguage.French;
+                languageIndex = 4;
+                break;
+            case (int)SystemLanguage.Spanish:
+                language = SystemLanguage.Spanish;
+                languageIndex = 5;
+                break;
+           
             default:
                 language = SystemLanguage.English;
+                languageIndex = 0;
                 break;
         }
 
     }
 
-    protected override void SetTableData(Dictionary<string, string> tableData)
-    {
-        TLocalizationData tData = new TLocalizationData();
-        tData.SetDataValues(tableData);
-
-
-        LocalizationData LocalizationData = new LocalizationData(tData);
-        dicLocalization.Add(LocalizationData.index, LocalizationData);
-    }
-
-    protected override void SetBinaryTableData(System.IO.BinaryReader reader)
-    {
-        TLocalizationData tData = new TLocalizationData();
-        tData.ReadBinary(reader);
-
-        LocalizationData LocalizationData = new LocalizationData(tData);
-        dicLocalization.Add(LocalizationData.index, LocalizationData);
-    }
-
-    protected override void ReadAndWriteBinaryTableData(Dictionary<string, string> tableData, System.IO.BinaryWriter writer)
-    {
-        TLocalizationData tData = new TLocalizationData();
-        tData.SetDataValues(tableData);
-        tData.WriteBinary(writer);
-    }
-
+   
     protected override void AfterLoadComplete()
     {
         LoadComplete = true;
 
         GetCurrentLanguageSettings();
-
+        
         if (listener != null)
-            listener.Invoke(false);
+            listener.Invoke();
     }
 
 
     public string GetLocalizationData(int stageIndex)
     {
-        if (!dicLocalization.ContainsKey(stageIndex))
+        if (!dicDatas.ContainsKey(stageIndex))
         {
             Debug.LogError("Not Exist Stage Data");
             return null;
@@ -150,29 +193,43 @@ public class LocalizationDataManager: TableBaseDataManager
         switch (this.language)
         {
             case SystemLanguage.English:
-                return dicLocalization[stageIndex].english;
-               
+                return dicDatas[stageIndex].english;
             case SystemLanguage.Korean:
-                return dicLocalization[stageIndex].korea;
+                return dicDatas[stageIndex].korea;
+            case SystemLanguage.Japanese:
+                return dicDatas[stageIndex].japan;
+            case SystemLanguage.Turkish:
+                return dicDatas[stageIndex].turkish;
+            case SystemLanguage.Italian:
+                return dicDatas[stageIndex].italian;
+            case SystemLanguage.Russian:
+                return dicDatas[stageIndex].russian;
+            case SystemLanguage.ChineseTraditional:
+                return dicDatas[stageIndex].taiwanese;
+            case SystemLanguage.French:
+                return dicDatas[stageIndex].french;
+            case SystemLanguage.Spanish:
+                return dicDatas[stageIndex].spanish;
+            case SystemLanguage.Portuguese:
+                return dicDatas[stageIndex].portuguese;
 
             default:
-                return dicLocalization[stageIndex].english;
+                return dicDatas[stageIndex].english;
         }
       
 
     }
 
-
-    public void UpdateLanguageText(SystemLanguage language)
+    public void UpdateLanguageText(SystemLanguage lan)
     {
-        this.language = language;
+        this.language = lan;
         PlayerPrefs.SetInt("Language", (int)this.language);
 
+        GetCurrentLanguageSettings();
+
         if(listener!=null)
-        listener.Invoke(true);
+            listener.Invoke();
     }
 
-   
-
-   
+    public int GetCurrentLanguageIndex => languageIndex;
 }

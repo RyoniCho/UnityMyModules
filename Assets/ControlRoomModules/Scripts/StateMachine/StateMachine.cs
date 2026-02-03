@@ -1,19 +1,25 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
-public class StateMachine<Tbehaviour> where Tbehaviour:MonoBehaviour
+public class StateMachine<Tbehaviour,TeState> where Tbehaviour:MonoBehaviour where TeState :System.Enum
 {
 
-    State<Tbehaviour> currentState;
-    State<Tbehaviour> nextState;
+    State<Tbehaviour,TeState> currentState;
+    State<Tbehaviour,TeState> nextState;
     int currentStateNum;
     int nextStateNum;
+    bool stateLock = false;
+  
 
     Tbehaviour behaviour;
     float stateElapseTime = 0f;
 
     public int CurrentState => currentStateNum;
+
+    public float StateElapseTime => stateElapseTime;
     
 
     public StateMachine(Tbehaviour _behaviour) 
@@ -21,9 +27,9 @@ public class StateMachine<Tbehaviour> where Tbehaviour:MonoBehaviour
         this.behaviour = _behaviour;
     }
         
-    Dictionary<int, State<Tbehaviour>> states = new Dictionary<int, State<Tbehaviour>>();
+    Dictionary<int, State<Tbehaviour,TeState>> states = new Dictionary<int, State<Tbehaviour,TeState>>();
 
-    public void RegistState<TeState>(TeState eState, State<Tbehaviour> stateMachine) where TeState : System.Enum
+    public void RegistState(TeState eState, State<Tbehaviour,TeState> stateMachine) 
     {
         
         var stateNum= (int)(System.IConvertible)eState;
@@ -37,9 +43,9 @@ public class StateMachine<Tbehaviour> where Tbehaviour:MonoBehaviour
           
     }
 
-    public void StartStateMachine<TeState>(TeState firstState) where TeState :System.Enum
+    public void StartStateMachine(TeState firstState)
     {
-        State<Tbehaviour> initialState;
+        State<Tbehaviour,TeState> initialState;
         var stateNum = (int)(System.IConvertible)firstState;
 
         if (states.TryGetValue(stateNum, out initialState))
@@ -55,7 +61,9 @@ public class StateMachine<Tbehaviour> where Tbehaviour:MonoBehaviour
         {
             Debug.LogError($"Could not find {firstState.ToString()}. Register State first");
         }
-       
+
+        stateLock = false;
+
 
     }
 
@@ -65,11 +73,15 @@ public class StateMachine<Tbehaviour> where Tbehaviour:MonoBehaviour
        
     }
 
-    public void SetState<TeState>(TeState eState) where TeState : System.Enum
+    public void SetState(TeState eState,bool isLock=false)
     {
+      
         var stateNum = (int)(System.IConvertible)eState;
 
+        if (stateLock)
+            return;
        
+        
         if(states.ContainsKey(stateNum))
         {
             var next = states[stateNum];
@@ -77,15 +89,36 @@ public class StateMachine<Tbehaviour> where Tbehaviour:MonoBehaviour
             {
                 this.nextState = next;
                 this.nextStateNum = stateNum;
-               
+
+                stateLock = isLock;
             }
         }
     }
 
-    public bool CheckStateElapseTime(float maxTime)
+   
+    public void SetStateForce(TeState eState,bool withReleaseLock=false)
+    {
+        var stateNum = (int)(System.IConvertible)eState;
+
+
+        if (states.ContainsKey(stateNum))
+        {
+            var next = states[stateNum];
+            if (next != currentState)
+            {
+                this.nextState = next;
+                this.nextStateNum = stateNum;
+                if (withReleaseLock)
+                    stateLock = false;
+            }
+        }
+    }
+
+
+    public bool CheckElapseTimeToFinsishState(float maxTime)
     {
        
-        if (maxTime >= this.stateElapseTime)
+        if (maxTime < this.stateElapseTime)
             return true;
 
         return false;
@@ -98,7 +131,7 @@ public class StateMachine<Tbehaviour> where Tbehaviour:MonoBehaviour
         {
             this.stateElapseTime += Time.deltaTime;
 
-            currentState.OnUpdateState();
+         
 
             if(nextState!=currentState)
             {
@@ -109,6 +142,10 @@ public class StateMachine<Tbehaviour> where Tbehaviour:MonoBehaviour
                 currentStateNum = nextStateNum;
                 this.stateElapseTime = 0f;
             }
+            else
+            {
+                currentState.OnUpdateState();
+            }
 
             yield return null;
 
@@ -117,13 +154,13 @@ public class StateMachine<Tbehaviour> where Tbehaviour:MonoBehaviour
        
     }
 
-    public TeState GetRandomState<TeState>() where TeState : System.Enum
+    public TeState GetRandomState() 
     {
         int randNum = 0;
 
         while (true)
         {
-            randNum = Random.Range(0, System.Enum.GetValues(typeof(TeState)).Length);
+            randNum = UnityEngine.Random.Range(0, System.Enum.GetValues(typeof(TeState)).Length);
             if (randNum != currentStateNum)
                 break;
 
@@ -134,14 +171,40 @@ public class StateMachine<Tbehaviour> where Tbehaviour:MonoBehaviour
     }
 }
 
-public abstract class State<TBehaviour> where TBehaviour :MonoBehaviour
+public abstract class State<TBehaviour,TeState> where TBehaviour :MonoBehaviour where TeState :System.Enum
 {
     protected TBehaviour behaviour;
-    protected StateMachine<TBehaviour> stateMachine;
-    public void InitialState(TBehaviour behaviour, StateMachine<TBehaviour> stateMachine)
+    protected StateMachine<TBehaviour,TeState> stateMachine;
+    private List<Transition<TeState>> transitions;
+    public void InitialState(TBehaviour behaviour, StateMachine<TBehaviour,TeState> stateMachine)
     {
         this.behaviour = behaviour;
         this.stateMachine = stateMachine;
+    }
+
+    public void AddTransition(Func<bool> condition, TeState targetState)
+    {
+        transitions.Add(new Transition<TeState>(condition,targetState));
+    }
+
+    public void CheckTransitions()
+    {
+        if (transitions.Count <= 0)
+        {
+            Debug.LogError($"State Transition is Empty! Check it out");
+            return;
+        }
+
+        foreach (var tr in transitions)
+        {
+            if (tr.Condition())
+            {
+                this.stateMachine.SetState(tr.TargetState);
+                break;
+            }
+        }
+          
+        
     }
     
     public abstract void OnEnterState();
@@ -149,6 +212,19 @@ public abstract class State<TBehaviour> where TBehaviour :MonoBehaviour
     public abstract void OnUpdateState();
 
     public abstract void OnExitState();
+
+}
+
+public class Transition<TeState> where TeState : System.Enum
+{
+    public Func<bool> Condition { get; }
+    public TeState TargetState { get; }
+    
+    public Transition(Func<bool> condition, TeState targetState)
+    {
+        Condition = condition;
+        TargetState = targetState;
+    }
 
 }
 

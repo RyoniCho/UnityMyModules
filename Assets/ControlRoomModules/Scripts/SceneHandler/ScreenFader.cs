@@ -20,6 +20,13 @@ namespace ControlRoom
         public CanvasGroup faderCanvasGroup;
         public CanvasGroup loadingCanvasGroup;
         public CanvasGroup gameOverCanvasGroup;
+        public CanvasGroup roundFaderCanvasGroup;
+
+#if FEED_BACK_USE
+        public MoreMountains.Feedbacks.MMF_Player fadeInRound;
+        public MoreMountains.Feedbacks.MMF_Player fadeOutRound;
+#endif
+
         public float fadeDuration = 1f;
 
         protected bool m_IsFading;
@@ -95,8 +102,45 @@ namespace ControlRoom
 
             yield return Instance.StartCoroutine(Instance.Fade(1f, canvasGroup));
         }
+
+     
+
+        public static void FadeRound(bool fadeOut=false)
+        {
+#if FEED_BACK_USE
+            var fade = Instance.fadeInRound;
+            if(fadeOut)
+            {
+                fade = Instance.fadeOutRound;
+            }
+
+            if (fade != null)
+            {
+                var fades = fade.GetFeedbacksOfType<MoreMountains.Feedbacks.MMF_Fade>();
+
+                if (fades.Count > 0)
+                {
+                    foreach (var f in fades)
+                    {
+
+                        f.TargetPosition = GameManager.Instance.ScreenCenterWorldPosition;
+                    }
+                }
+
+            }
+
+            fade.Events.OnComplete.RemoveAllListeners();
+            fade.Events.OnComplete.AddListener(() =>
+            {
+                if(fadeOut)
+                    Instance.roundFaderCanvasGroup.gameObject.SetActive(false);
+            });
+
+            Instance.roundFaderCanvasGroup.gameObject.SetActive(true);
+            fade?.PlayFeedbacks();
+#endif
+        }
+
+      
     }
 }
-
-
-

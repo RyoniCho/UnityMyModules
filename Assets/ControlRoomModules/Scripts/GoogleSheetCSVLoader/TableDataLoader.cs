@@ -101,7 +101,24 @@ namespace ControlRoom
 #endif
                 try
                 {
-                    var bytes = System.IO.File.ReadAllBytes(binPath);
+                    byte[] bytes = null;
+                    #if UNITY_ANDROID
+                    WWW binWWW = new WWW(binPath);
+                    while(!binWWW.isDone){}
+
+                    if(!string.IsNullOrEmpty(binWWW.error))
+                    {
+                        Debug.LogError($"www error : {binWWW.error}");
+                    }
+                    else
+                    {
+                        bytes = binWWW.bytes;
+                    }
+                    
+                    #else
+                    bytes = System.IO.File.ReadAllBytes(binPath);
+                    #endif
+
                     using (var memoryStream = new System.IO.MemoryStream(bytes))
                     {
                         using (var reader = new System.IO.BinaryReader(memoryStream))

@@ -5,6 +5,9 @@ using UnityEditor;
 using System.Linq;
 using System.Diagnostics;
 using System.Threading.Tasks;
+#if UNITY_EDITOR
+using UnityEditor.Build;
+#endif
 
 namespace ControlRoom
 {
@@ -132,13 +135,13 @@ namespace ControlRoom
  
         static AddDefineSymbols()
         {
-            string definesString = PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
+            string definesString = PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup));
+            
             List<string> allDefines = definesString.Split(';').ToList();
             allDefines.AddRange(Symbols.Except(allDefines));
-
-            PlayerSettings.SetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup,
-             string.Join(";", allDefines.ToArray()));
-
+           
+            PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.FromBuildTargetGroup(EditorUserBuildSettings.selectedBuildTargetGroup),string.Join(";", allDefines.ToArray()));
+            
         }
     }
 #endif

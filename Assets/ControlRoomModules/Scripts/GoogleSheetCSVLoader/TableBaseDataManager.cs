@@ -1,12 +1,23 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Threading.Tasks;
 namespace ControlRoom
 {
-    public class TableBaseDataManager
+    public interface ITableBaseDataManager
+    {
+        public Task LoadData();
+        public Task LoadBinaryData();
+        public Task BuildBinaryData();
+    }
+    
+    public class TableBaseDataManager<TBaseClass,TTableClass,TDicKeyType> : ITableBaseDataManager
+        where TTableClass: DataForm, new() 
+        where TBaseClass : ITableData, IKeyProvider<TDicKeyType>, new() 
     {
         protected virtual TableManager.GoogleDocsID currentTableId => TableManager.GoogleDocsID.NONE;
+        protected Dictionary<TDicKeyType, TBaseClass> dicDatas = new Dictionary<TDicKeyType, TBaseClass>();
 
 
         public async Task BuildBinaryData()
@@ -23,18 +34,20 @@ namespace ControlRoom
 
         public async Task LoadBinaryData()
         {
+          
             if (currentTableId == TableManager.GoogleDocsID.NONE)
             {
                 UnityEngine.Debug.LogError("Google Docs ID is None.");
                 return;
 
             }
-            await TableDataLoader.LoadData((int)currentTableId, (System.IO.BinaryReader reader) =>
-            {
-                ConvertBinaryData(reader);
-                TableManager.Instance.LoadCompleteTableData(currentTableId);
-                AfterLoadComplete();
-            });
+
+            await TableDataLoader.LoadData((int)currentTableId,
+                (System.IO.BinaryReader reader) => { ConvertBinaryData(reader); });
+
+            TableManager.Instance.LoadCompleteTableData(currentTableId);
+            AfterLoadComplete();
+           
 
         }
 
@@ -50,10 +63,11 @@ namespace ControlRoom
             await TableDataLoader.LoadData((int)currentTableId, (TableData data) =>
             {
                 ConvertTableData(data);
-
-                TableManager.Instance.LoadCompleteTableData(currentTableId);
-                AfterLoadComplete();
+               
             });
+            
+            TableManager.Instance.LoadCompleteTableData(currentTableId);
+            AfterLoadComplete();
         }
 
         private void ConvertTableData(TableData data)
@@ -79,9 +93,51 @@ namespace ControlRoom
             }
         }
 
-        protected virtual void SetTableData(Dictionary<string, string> tableData) { }
-        protected virtual void SetBinaryTableData(System.IO.BinaryReader reader) { }
-        protected virtual void ReadAndWriteBinaryTableData(Dictionary<string, string> tableData, System.IO.BinaryWriter writer) { }
+        protected virtual void SetTableData(Dictionary<string, string> tableData)
+        {
+            TTableClass tData = new TTableClass();
+            tData.SetDataValues(tableData);
+
+            TBaseClass baseData = new TBaseClass();
+            baseData.SetValue(tData);
+            
+            TDicKeyType key = baseData.GetKey();
+            if (!dicDatas.ContainsKey(key))
+            {
+                dicDatas.Add(key, baseData);
+            }
+            else
+            {
+                Debug.LogWarning($"Duplicate key detected: {key}");
+            }
+        }
+
+
+        protected virtual void SetBinaryTableData(System.IO.BinaryReader reader)
+        {
+            TTableClass tData = new TTableClass();
+            tData.ReadBinary(reader);
+
+            TBaseClass baseData = new TBaseClass();
+            baseData.SetValue(tData);
+
+            TDicKeyType key = baseData.GetKey();
+            if (!dicDatas.ContainsKey(key))
+            {
+                dicDatas.Add(key, baseData);
+            }
+            else
+            {
+                Debug.LogWarning($"Duplicate key detected: {key}");
+            }
+
+        }
+        protected virtual void ReadAndWriteBinaryTableData(Dictionary<string, string> tableData, System.IO.BinaryWriter writer)
+        {
+            TTableClass tData = new TTableClass();
+            tData.SetDataValues(tableData);
+            tData.WriteBinary(writer);
+        }
         protected virtual void AfterLoadComplete() { }
 
     }

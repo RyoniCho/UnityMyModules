@@ -10,7 +10,8 @@
 
 extern "C"
 {
-    typedef void (*DelegateCallbackFunction)();
+    typedef void (*DelegateCallbackFunction)(long methodId);
+    typedef void (*DelegateBooleanCallbackFunction)(long methodId, bool status);
     
 }
 
